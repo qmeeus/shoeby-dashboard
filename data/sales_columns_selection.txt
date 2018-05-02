@@ -1,0 +1,16 @@
+Order, Order Date
+Order, Order Time
+Order, Web Shop Code
+Product, No_
+Product, Merchandise Code
+Product, External Record Id
+Product, Season
+Product, Item Type
+Product, Brand
+Product, Description
+Product, Merchandise Description
+Product, Vertical Component Code
+Product, Horizontal Component Code
+Order, Quantity
+Order, Quantity Returned
+Product, Unit Price

@@ -1,6 +1,7 @@
+numpy
 pandas
-dash==0.21.1  # The core dash backend
-dash-renderer==0.12.1  # The dash front-end
-dash-html-components==0.10.1  # HTML components
-dash-core-components==0.22.1  # Supercharged components
-plotly  # Plotly graphing library used in examples
+dash==0.21.1
+dash-renderer==0.12.1
+dash-html-components==0.10.1
+dash-core-components==0.22.1
+plotly

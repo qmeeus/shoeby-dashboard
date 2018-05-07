@@ -12,24 +12,39 @@ from data import load_sales, prepare_size_dist
 # TODO: Source of inspiration: https://github.com/plotly/dash-oil-and-gas-demo
 # TODO: Source of inspiration: https://dash.plot.ly/gallery
 
+
 def main():
+    # Load the data
     sales = load_sales()
+
+    # Create the dashboard
     app = dash.Dash()
+
+    # Set the layout (HTML/CSS)
     app.layout = size_hist_layout(sales, [("Brand", "EKS")])
+
+    # Define the outputs required by the callback function
     output = dash.dependencies.Output('indicator-graphic', 'figure')
+
+    # Define the inputs required by the callback function
     inputs = [dash.dependencies.Input('xaxis-column', 'value'),
               dash.dependencies.Input('xaxis-type', 'value'), ]
 
     @app.callback(output, inputs)
     def update_graph(xaxis_column_name, xaxis_type):
+
+        # Prepare the data
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {
+
+            # Draw a simple bar chart
             'data': [go.Bar(
                 x=x_data,
                 y=y_data,
             )],
 
+            # Specify the layout defined by the filters & other CSS attributes
             'layout': go.Layout(
                 xaxis={
                     'title': xaxis_column_name,
@@ -40,6 +55,7 @@ def main():
             )
         }
 
+    # Run the server
     app.run_server(debug=True)
 
 

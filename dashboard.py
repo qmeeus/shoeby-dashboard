@@ -2,7 +2,7 @@ import dash
 import plotly.graph_objs as go
 
 from layout import size_hist_layout
-from data import load_sales, prepare_size_dist
+from data import load_sales, prepare_size_dist, load_inventory
 
 # TODO: How to include pyplot & seaborn plots in dash?
 # TODO: Dynamic filters
@@ -16,6 +16,7 @@ from data import load_sales, prepare_size_dist
 def main():
     # Load the data
     sales = load_sales()
+    inventory = load_inventory()
 
     # Create the dashboard
     app = dash.Dash()
@@ -32,19 +33,65 @@ def main():
 
     @app.callback(output, inputs)
     def update_graph(xaxis_column_name, xaxis_type):
+        x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
+        x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
-        # Prepare the data
+        return {
+            'data': [go.Bar(
+                x=x_data,
+                y=y_data,
+                name='Sales'
+            ), go.Bar(
+            x=x_inventory,
+            y=y_inventory,
+                name='StockLevels'
+            )],
+
+            'layout': go.Layout(
+                xaxis={
+                    'title': xaxis_column_name,
+                    'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
+                },
+                margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+                hovermode='closest'
+            )
+        }
+
+    @app.callback(dash.dependencies.Output('sales', 'figure'), inputs)
+    def update_graph_sales(xaxis_column_name, xaxis_type):
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {
 
-            # Draw a simple bar chart
             'data': [go.Bar(
                 x=x_data,
                 y=y_data,
-            )],
+            )
+            ],
 
-            # Specify the layout defined by the filters & other CSS attributes
+            'layout': go.Layout(
+                xaxis={
+                    'title': xaxis_column_name,
+                    'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
+                },
+                margin={'l': 40, 'b': 40, 't': 10, 'r': 0}
+
+            )
+        }
+
+    @app.callback(dash.dependencies.Output('InventoryLevels', 'figure'), inputs)
+    def update_graph_inventory(xaxis_column_name, xaxis_type):
+        x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
+
+        return {
+
+            'data': [go.Bar(
+                x=x_inventory,
+                y=y_inventory,
+
+            )
+                      ],
+
             'layout': go.Layout(
                 xaxis={
                     'title': xaxis_column_name,

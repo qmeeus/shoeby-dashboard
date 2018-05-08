@@ -40,6 +40,13 @@ def histogram():
     """
     return dcc.Graph(id='indicator-graphic')
 
+def salesGraph():
+    return dcc.Graph(id='sales')
+
+def inventoryGraph():
+    return dcc.Graph(id='InventoryLevels')
+
+
 
 def size_hist_layout(inventory, filters):
     """
@@ -53,9 +60,12 @@ def size_hist_layout(inventory, filters):
 
     selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
     graph = histogram()
+    graph2 = salesGraph()
+    graph3 = inventoryGraph()
+
     return html.Div([
         html.Div(selectors,
                  id="size_dist_selectors",
                  style={'width': '48%', 'display': 'inline-block'},
                  ),
-        graph])
+        graph, graph2, graph3])

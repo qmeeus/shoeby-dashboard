@@ -22,6 +22,12 @@ def main():
     # Create the dashboard
     app = dash.Dash()
 
+    # Configure local hosting of css files
+    app.css.config.serve_locally = True
+
+    # Add css stylesheet
+    app.css.append_css({})
+
     # Set the layout (HTML/CSS)
     app.layout = build_layout(sales, [("Brand", "EKS")])
 

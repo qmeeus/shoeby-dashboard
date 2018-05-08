@@ -87,6 +87,7 @@ def build_layout(inventory, filters):
     # TODO: Create and organise the filters in config.py
     # TODO: Position of the dropdown vs. graphs in html/css
     # TODO: Make filters dynamic
+    # TODO: How to make className effective (css)
     """
     Create a div containers composed of filters and a histogram
     """

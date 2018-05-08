@@ -1,7 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-
 def dropdown(title, values, default):
     """
     Creates a simple div container with a title and a dropdown.
@@ -40,17 +39,25 @@ def size_distribution():
     """
     return html.Div(
         [dcc.Graph(id='indicator-graphic')],
-        className='eight columns',
+        className='six columns',
         style={'margin-top': '20'}
     )
 
 
 def sales_history():
-    return dcc.Graph(id='sales')
+    return html.Div(
+        [dcc.Graph(id='sales')],
+        className='six columns',
+        style={'margin-top': '20'}
+    )
 
 
 def inventory_history():
-    return dcc.Graph(id='InventoryLevels')
+    return html.Div(
+        [dcc.Graph(id='inventory-levels')],
+        className='six columns',
+        style={'margin-top': '20'}
+    )
 
 
 def make_title():
@@ -94,16 +101,27 @@ def build_layout(inventory, filters):
                  for title, default in filters]
     selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
 
-    # Make the graph
+    # Make the graphs
     size_dist = size_distribution()
     sales_hist = sales_history()
     inventory_level = inventory_history()
 
+    graphs = html.Div(
+        [
+            html.Div([size_dist, sales_hist], className="row"),
+            html.Div([inventory_level], className="row"),
+        ]
+    )
+
     # Return the whole layout
-    return html.Div([
-        title,
-        html.Div(selectors,
-                 id="size_dist_selectors",
-                 style={'width': '48%', 'display': 'inline-block'},
-                 ),
-        size_dist, sales_hist, inventory_level])
+    return html.Div(
+        [
+            title,
+            html.Div(selectors,
+                     id="size_dist_selectors",
+                     style={'width': '48%', 'display': 'inline-block'},
+                     ),
+            graphs
+        ],
+        className='ten columns offset-by-one'
+    )

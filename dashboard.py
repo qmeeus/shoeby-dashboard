@@ -28,7 +28,7 @@ def main():
     # Define the outputs required by the callback function
     size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')
     sales_history_output = dash.dependencies.Output('sales', 'figure')
-    inventory_output = dash.dependencies.Output('InventoryLevels', 'figure')
+    inventory_output = dash.dependencies.Output('inventory-levels', 'figure')
 
     # Define the inputs required by the callback function
     inputs = [dash.dependencies.Input('xaxis-column', 'value'),

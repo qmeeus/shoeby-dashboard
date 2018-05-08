@@ -40,30 +40,64 @@ def histogram():
     """
     return dcc.Graph(id='indicator-graphic')
 
+
 def salesGraph():
     return dcc.Graph(id='sales')
+
 
 def inventoryGraph():
     return dcc.Graph(id='InventoryLevels')
 
 
+def make_title():
+    return html.Div(
+        [
+            html.H1(
+                'Shoeby Sales & Inventory - Overview',
+                className='eight columns',
+            ),
+            html.Img(
+                src="https://www.shoeby.nl/skin/frontend/shoeby/default/images/shoeby_logo.svg",
+                className='one columns',
+                style={
+                    'height': '100',
+                    'width': '225',
+                    'float': 'right',
+                    'position': 'relative',
+                },
+            ),
+        ],
+        className='row'
+    )
 
-def size_hist_layout(inventory, filters):
-    """
-    Create a div containers composed of filters and a histogram
-    """
+
+def build_layout(inventory, filters):
     # TODO: Create and organise the filters in config.py
     # TODO: Position of the dropdown vs. graphs in html/css
     # TODO: Make filters dynamic
+    """
+    Create a div containers composed of filters and a histogram
+    """
+
+    # Add stylesheet
+    dcc._css_dist[0]['relative_package_path'].append("resources/stylesheet.css")
+
+    # Make the title
+    title = make_title()
+
+    # Make the selectors
     selectors = [dropdown(title, [None] + sorted(inventory[title].dropna().unique()), default)
                  for title, default in filters]
-
     selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
+
+    # Make the graph
     graph = histogram()
     graph2 = salesGraph()
     graph3 = inventoryGraph()
 
+    # Return the whole layout
     return html.Div([
+        title,
         html.Div(selectors,
                  id="size_dist_selectors",
                  style={'width': '48%', 'display': 'inline-block'},

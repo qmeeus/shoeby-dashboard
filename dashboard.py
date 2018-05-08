@@ -20,6 +20,9 @@ def main():
     # Create the dashboard
     app = dash.Dash()
 
+    # Add stylesheet
+    app.css.append_css({'external_url': 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
+
     # Set the layout (HTML/CSS)
     app.layout = build_layout(sales, [("Brand", "EKS")])
 

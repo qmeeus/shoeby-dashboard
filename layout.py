@@ -33,12 +33,16 @@ def radio(title, values, default):
     ])
 
 
-def histogram():
+def size_distribution():
     """
     Creates a histogram
     The id is set to be used in dashboard.py
     """
-    return dcc.Graph(id='indicator-graphic')
+    return html.Div(
+        [dcc.Graph(id='indicator-graphic')],
+        className='eight columns',
+        style={'margin-top': '20'}
+    )
 
 
 def salesGraph():
@@ -91,7 +95,7 @@ def build_layout(inventory, filters):
     selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
 
     # Make the graph
-    graph = histogram()
+    graph = size_distribution()
     graph2 = salesGraph()
     graph3 = inventoryGraph()
 

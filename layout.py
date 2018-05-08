@@ -45,11 +45,11 @@ def size_distribution():
     )
 
 
-def salesGraph():
+def sales_history():
     return dcc.Graph(id='sales')
 
 
-def inventoryGraph():
+def inventory_history():
     return dcc.Graph(id='InventoryLevels')
 
 
@@ -95,9 +95,9 @@ def build_layout(inventory, filters):
     selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
 
     # Make the graph
-    graph = size_distribution()
-    graph2 = salesGraph()
-    graph3 = inventoryGraph()
+    size_dist = size_distribution()
+    sales_hist = sales_history()
+    inventory_level = inventory_history()
 
     # Return the whole layout
     return html.Div([
@@ -106,4 +106,4 @@ def build_layout(inventory, filters):
                  id="size_dist_selectors",
                  style={'width': '48%', 'display': 'inline-block'},
                  ),
-        graph, graph2, graph3])
+        size_dist, sales_hist, inventory_level])

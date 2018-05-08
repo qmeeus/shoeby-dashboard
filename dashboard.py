@@ -26,14 +26,16 @@ def main():
     app.layout = build_layout(sales, [("Brand", "EKS")])
 
     # Define the outputs required by the callback function
-    output = dash.dependencies.Output('indicator-graphic', 'figure')
+    size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')
+    sales_hist_output = dash.dependencies.Output('sales', 'figure')
+    inventory_output = dash.dependencies.Output('InventoryLevels', 'figure')
 
     # Define the inputs required by the callback function
     inputs = [dash.dependencies.Input('xaxis-column', 'value'),
               dash.dependencies.Input('xaxis-type', 'value'), ]
 
-    @app.callback(output, inputs)
-    def update_graph(xaxis_column_name, xaxis_type):
+    @app.callback(size_dist_output, inputs)
+    def update_size_dist(xaxis_column_name, xaxis_type):
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
         x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
@@ -58,7 +60,7 @@ def main():
             )
         }
 
-    @app.callback(dash.dependencies.Output('sales', 'figure'), inputs)
+    @app.callback(sales_hist_output, inputs)
     def update_graph_sales(xaxis_column_name, xaxis_type):
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
 
@@ -80,7 +82,7 @@ def main():
             )
         }
 
-    @app.callback(dash.dependencies.Output('InventoryLevels', 'figure'), inputs)
+    @app.callback(inventory_output, inputs)
     def update_graph_inventory(xaxis_column_name, xaxis_type):
         x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 

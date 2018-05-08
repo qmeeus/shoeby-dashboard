@@ -1,7 +1,7 @@
 import dash
 import plotly.graph_objs as go
 
-from layout import size_hist_layout
+from layout import build_layout
 from data import load_sales, prepare_size_dist
 
 # TODO: How to include pyplot & seaborn plots in dash?
@@ -21,7 +21,7 @@ def main():
     app = dash.Dash()
 
     # Set the layout (HTML/CSS)
-    app.layout = size_hist_layout(sales, [("Brand", "EKS")])
+    app.layout = build_layout(sales, [("Brand", "EKS")])
 
     # Define the outputs required by the callback function
     output = dash.dependencies.Output('indicator-graphic', 'figure')

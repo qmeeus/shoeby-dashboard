@@ -27,7 +27,7 @@ def main():
 
     # Define the outputs required by the callback function
     size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')
-    sales_hist_output = dash.dependencies.Output('sales', 'figure')
+    sales_history_output = dash.dependencies.Output('sales', 'figure')
     inventory_output = dash.dependencies.Output('InventoryLevels', 'figure')
 
     # Define the inputs required by the callback function
@@ -60,8 +60,8 @@ def main():
             )
         }
 
-    @app.callback(sales_hist_output, inputs)
-    def update_graph_sales(xaxis_column_name, xaxis_type):
+    @app.callback(sales_history_output, inputs)
+    def update_sales_history(xaxis_column_name, xaxis_type):
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {
@@ -83,7 +83,7 @@ def main():
         }
 
     @app.callback(inventory_output, inputs)
-    def update_graph_inventory(xaxis_column_name, xaxis_type):
+    def update_inventory(xaxis_column_name, xaxis_type):
         x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {

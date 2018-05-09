@@ -37,7 +37,7 @@ def main():
               dash.dependencies.Input('xaxis-type', 'value'), ]
 
     @app.callback(size_dist_output, inputs)
-    def update_size_dist(xaxis_column_name, xaxis_type):
+    def make_size_distribution(xaxis_column_name, xaxis_type):
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
         x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
@@ -63,18 +63,11 @@ def main():
         }
 
     @app.callback(sales_history_output, inputs)
-    def update_sales_history(xaxis_column_name, xaxis_type):
+    def make_sales_history(xaxis_column_name, xaxis_type):
         x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
 
-        return {
-
-            'data': [go.Bar(
-                x=x_data,
-                y=y_data,
-            )
-            ],
-
-            'layout': go.Layout(
+        data = [go.Bar(x=x_data, y=y_data)]
+        layout = go.Layout(
                 xaxis={
                     'title': xaxis_column_name,
                     'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
@@ -82,10 +75,10 @@ def main():
                 margin={'l': 40, 'b': 40, 't': 10, 'r': 0}
 
             )
-        }
+        return dict(data=data, layout=layout)
 
     @app.callback(inventory_output, inputs)
-    def update_inventory(xaxis_column_name, xaxis_type):
+    def make_inventory_level(xaxis_column_name, xaxis_type):
         x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {

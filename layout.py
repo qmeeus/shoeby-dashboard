@@ -133,6 +133,29 @@ def make_graphs():
     )
 
 
+def make_graph_layout(**kwargs):
+    layout = dict(
+        autosize=True,
+        height=500,
+        font=dict(color='#CCCCCC'),
+        titlefont=dict(color='#CCCCCC', size='14'),
+        margin=dict(
+            l=35,
+            r=35,
+            b=35,
+            t=45
+        ),
+        hovermode="closest",
+        plot_bgcolor="#191A1A",
+        paper_bgcolor="#020202",
+        legend=dict(font=dict(size=10), orientation='h'),
+        title='Satellite Overview',
+    )
+    for key, value in kwargs:
+        layout[key] = value
+    return layout
+
+
 def build_page(inventory, filters):
     # TODO: Create and organise the filters in config.py
     # TODO: Position of the dropdown vs. graphs in html/css

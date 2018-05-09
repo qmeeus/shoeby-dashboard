@@ -83,7 +83,7 @@ def make_title():
     )
 
 
-def build_layout(inventory, filters):
+def build_page(inventory, filters):
     # TODO: Create and organise the filters in config.py
     # TODO: Position of the dropdown vs. graphs in html/css
     # TODO: Make filters dynamic

@@ -1,7 +1,7 @@
 import dash
 import plotly.graph_objs as go
 
-from layout import build_layout
+from layout import build_page
 from data import load_sales, prepare_size_dist, load_inventory
 
 
@@ -22,14 +22,10 @@ def main():
     # Create the dashboard
     app = dash.Dash()
 
-    # Configure local hosting of css files
-    app.css.config.serve_locally = True
-
-    # Add css stylesheet
-    app.css.append_css({})
+    app.css.append_css({'external_url': 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})  # noqa: E501
 
     # Set the layout (HTML/CSS)
-    app.layout = build_layout(sales, [("Brand", "EKS")])
+    app.layout = build_page(sales, [("Brand", "EKS")])
 
     # Define the outputs required by the callback function
     size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')

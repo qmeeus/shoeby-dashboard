@@ -26,3 +26,5 @@ else:
 To push:
 <br/>
 `git push`
+<br/>
+**Don't forget to update (or pull) the project before working on it. Other wise, you won't have the latest version**

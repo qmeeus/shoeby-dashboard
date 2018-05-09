@@ -83,6 +83,29 @@ def make_title():
     )
 
 
+def make_selectors(df, filters):
+    selectors = [dropdown(title, [None] + sorted(df[title].dropna().unique()), default)
+     for title, default in filters]
+    selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
+    return html.Div(
+        selectors,
+        id="size_dist_selectors",
+        style={'width': '48%', 'display': 'inline-block'}
+    )
+
+
+def make_graphs():
+    size_dist = size_distribution()
+    sales_hist = sales_history()
+    inventory_level = inventory_history()
+    return html.Div(
+        [
+            html.Div([size_dist, sales_hist], className="row"),
+            html.Div([inventory_level], className="row"),
+        ]
+    )
+
+
 def build_page(inventory, filters):
     # TODO: Create and organise the filters in config.py
     # TODO: Position of the dropdown vs. graphs in html/css
@@ -99,30 +122,16 @@ def build_page(inventory, filters):
     title = make_title()
 
     # Make the selectors
-    selectors = [dropdown(title, [None] + sorted(inventory[title].dropna().unique()), default)
-                 for title, default in filters]
-    selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
+    selectors = make_selectors(inventory, filters)
 
     # Make the graphs
-    size_dist = size_distribution()
-    sales_hist = sales_history()
-    inventory_level = inventory_history()
-
-    graphs = html.Div(
-        [
-            html.Div([size_dist, sales_hist], className="row"),
-            html.Div([inventory_level], className="row"),
-        ]
-    )
+    graphs = make_graphs()
 
     # Return the whole layout
     return html.Div(
         [
             title,
-            html.Div(selectors,
-                     id="size_dist_selectors",
-                     style={'width': '48%', 'display': 'inline-block'},
-                     ),
+            selectors,
             graphs
         ],
         className='ten columns offset-by-one'

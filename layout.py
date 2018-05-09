@@ -61,25 +61,52 @@ def inventory_history():
     )
 
 
-def make_title():
+def make_title(df, filters):
     return html.Div(
         [
-            html.H1(
-                'Shoeby Sales & Inventory - Overview',
-                className='eight columns',
+            html.Div(
+                [
+                    html.H1(
+                        'Shoeby Sales & Inventory - Overview',
+                        className='eight columns',
+                    ),
+                    html.Img(
+                        src="https://www.shoeby.nl/skin/frontend/shoeby/default/images/shoeby_logo.svg",
+                        className='one columns',
+                        style={
+                            'height': '100',
+                            'width': '225',
+                            'float': 'right',
+                            'position': 'relative',
+                        },
+                    ),
+                ],
+                className='row'
             ),
-            html.Img(
-                src="https://www.shoeby.nl/skin/frontend/shoeby/default/images/shoeby_logo.svg",
-                className='one columns',
-                style={
-                    'height': '100',
-                    'width': '225',
-                    'float': 'right',
-                    'position': 'relative',
-                },
+            html.Div(
+                [
+                    html.H5(
+                        '',
+                        id='inventory_text',
+                        className='two columns'
+                    ),
+                    html.H5(
+                        '',
+                        id='gap_text',
+                        className='eight columns',
+                        style={'text-align': 'center'}
+                    ),
+                    html.H5(
+                        '',
+                        id='year_text',
+                        className='two columns',
+                        style={'text-align': 'right'}
+                    ),
+                ],
+                className='row'
             ),
-        ],
-        className='row'
+            make_selectors(df, filters)
+        ]
     )
 
 
@@ -119,10 +146,7 @@ def build_page(inventory, filters):
     dcc._css_dist[0]['relative_package_path'].append("resources/stylesheet.css")
 
     # Make the title
-    title = make_title()
-
-    # Make the selectors
-    selectors = make_selectors(inventory, filters)
+    title = make_title(inventory, filters)
 
     # Make the graphs
     graphs = make_graphs()
@@ -131,7 +155,6 @@ def build_page(inventory, filters):
     return html.Div(
         [
             title,
-            selectors,
             graphs
         ],
         className='ten columns offset-by-one'

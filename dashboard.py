@@ -2,7 +2,13 @@ import dash
 import plotly.graph_objs as go
 
 from layout import build_page
-from data import load_sales, prepare_size_dist, load_inventory
+from data import (
+    load_sales,
+    prepare_size_dist,
+    load_inventory,
+    prepare_inventory,
+    prepare_sales_history
+)
 
 
 # TODO: How to include pyplot & seaborn plots in dash?
@@ -38,13 +44,12 @@ def main():
 
     @app.callback(size_dist_output, inputs)
     def make_size_distribution(xaxis_column_name, xaxis_type):
-        x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
-        x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
+        x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {
             'data': [go.Bar(
-                x=x_data,
-                y=y_data,
+                x=x_sales,
+                y=y_sales,
                 name='Sales'
             ), go.Bar(
             x=x_inventory,
@@ -64,7 +69,7 @@ def main():
 
     @app.callback(sales_history_output, inputs)
     def make_sales_history(xaxis_column_name, xaxis_type):
-        x_data, y_data = prepare_size_dist(sales, Brand=xaxis_column_name, relative=xaxis_type)
+        x_data, y_data = prepare_sales_history(sales, Brand=xaxis_column_name, relative=xaxis_type)
 
         data = [go.Bar(x=x_data, y=y_data)]
         layout = go.Layout(
@@ -78,7 +83,7 @@ def main():
 
     @app.callback(inventory_output, inputs)
     def make_inventory_level(xaxis_column_name, xaxis_type):
-        x_inventory, y_inventory = prepare_size_dist(inventory, Brand=xaxis_column_name, relative=xaxis_type)
+        x_inventory, y_inventory = prepare_inventory(inventory, Brand=xaxis_column_name, relative=xaxis_type)
 
         return {
 

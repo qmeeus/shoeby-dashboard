@@ -171,6 +171,45 @@ def filter_sizes(data):
     return data
 
 
+def prepare_data(data, **kwargs):
+    assert isinstance(data, pd.DataFrame)
+    data = data.copy()
+
+    start_date = kwargs.get("start_date", START_DATE)
+    end_date = kwargs.get("end_date", END_DATE)
+
+    filters = [
+
+        ("Web Shop Code", kwargs.get("retailer")),
+        ("Brand", kwargs.get("brand")),
+        ("Season", kwargs.get("season")),
+        ("Merchandise Code", kwargs.get("product_code"))
+
+    ]
+
+    simple_filter = lambda data, column, value: data[data[column] == value].copy()
+
+    def filter_date(data, start_date=None, end_date=None):
+        # Filter start date and end date
+        data = data.copy()
+        convert_date = lambda date: dt.datetime(date.year, date.month, date.day)
+        if start_date:
+            data = data[data.index >= convert_date(start_date)]
+        if end_date:
+            data = data[data.index <= convert_date(end_date)]
+        return data
+
+    # Filter out unwanted values
+    # data = filter_date(data, start_date, end_date)
+    #     data = filter_sizes(data)
+
+    # for name, value in filters:
+    #     if value is not None:
+    #         data = simple_filter(data, name, value)
+
+    return filter_data(data, **kwargs)
+
+
 def filter_data(data, **kwargs):
     data = data.copy()
     for key, value in kwargs.items():
@@ -180,12 +219,37 @@ def filter_data(data, **kwargs):
     return data
 
 
-def prepare_size_dist(data, **kwargs):
+def prepare_size_dist(sales, inventory, **kwargs):
+    output = []
+    for i, df in enumerate([sales, inventory]):
+        y_column = "Quantity" if not i else "NetQuantity"
+        df = prepare_data(df, **kwargs)
+        df = df[["Size", y_column]]
+        grouped = df.groupby("Size").sum()
+        output.append(grouped.index)
+        output.append(grouped[y_column])
+
+    return output
+
+
+def prepare_sales_history(sales, **kwargs):
+    data = prepare_data(sales, **kwargs)
+    frequency = kwargs.get("frequency", SAMPLING)
+    y_data = kwargs.get("y_data")
+    if y_data:
+        columns = FILTERS[list(map(lambda x: x[1], FILTERS)).index(y_data)][0]
+        data = data.reset_index().pivot_table(index="order_date", columns=columns, values="Quantity", aggfunc="sum")
+    else:
+        data = data["Quantity"]
+    data = data.resample(frequency).sum()
+    return data.index, data.values
+
+def prepare_inventory(data, **kwargs):
     data = filter_data(data, **kwargs)
-    data = data[["Size", "Quantity"]]
+    data = data[["Size", "NetQuantity"]]
     grouped = data.groupby("Size").sum()
     x_data = grouped.index
-    y_data = grouped["Quantity"]
+    y_data = grouped["NetQuantity"]
 
     return x_data, y_data
 
@@ -208,7 +272,7 @@ def join_path(filename):
 
 # DEBUG
 if __name__ == '__main__':
-    inventory = load_inventory()
-    # sales = load_sales()
-    # print(sales.head())
-    print(inventory.head())
+    # inventory = load_inventory()
+    sales = load_sales()
+    print(sales.index.dtype)
+    # print(inventory.head())

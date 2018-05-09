@@ -73,7 +73,6 @@ def main():
                     'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
                 },
                 margin={'l': 40, 'b': 40, 't': 10, 'r': 0}
-
             )
         return dict(data=data, layout=layout)
 

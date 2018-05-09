@@ -74,8 +74,8 @@ def make_title(df, filters):
                         src="https://www.shoeby.nl/skin/frontend/shoeby/default/images/shoeby_logo.svg",
                         className='one columns',
                         style={
-                            'height': '100',
-                            'width': '225',
+                            'height': '71',
+                            'width': '170',
                             'float': 'right',
                             'position': 'relative',
                         },
@@ -137,7 +137,6 @@ def build_page(inventory, filters):
     # TODO: Create and organise the filters in config.py
     # TODO: Position of the dropdown vs. graphs in html/css
     # TODO: Make filters dynamic
-    # TODO: How to make className effective (css)
     """
     Create a div containers composed of filters and a histogram
     """

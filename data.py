@@ -106,7 +106,7 @@ def build_inventory():
         .dropna()
         .drop(["Posting Date", "ACACollection", "Merchandise Code", "Product Group Code"], axis=1)
         .rename(columns={"product_code": "Merchandise Code", "ACABrand": "Brand"})
-        .groupby(["posting_date", "Item No_", "Size", "Color"])
+        .groupby(["posting_date", "Brand", "Item No_", "Size", "Color"])
         .agg({
             column: 'max' for column in final_column_selection})
         .reset_index()
@@ -272,7 +272,7 @@ def join_path(filename):
 
 # DEBUG
 if __name__ == '__main__':
-    # inventory = load_inventory()
-    sales = load_sales()
-    print(sales.index.dtype)
-    # print(inventory.head())
+    inventory = load_inventory()
+    # sales = load_sales()
+    # x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory)
+    # print(inventory.columns)

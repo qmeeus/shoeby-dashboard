@@ -55,8 +55,11 @@ def main():
             ), go.Bar(
             x=x_inventory,
             y=y_inventory,
-                name='StockLevels'
-            )],
+                name='Stock levels',
+                marker=dict(
+            color='rgb(255, 125, 0)'
+        )
+        )],
 
             'layout': go.Layout(
                 xaxis={
@@ -91,9 +94,11 @@ def main():
             'data': [go.Bar(
                 x=x_inventory,
                 y=y_inventory,
+                name='Stock levels1',
                 marker=dict(
                     color='rgb(255, 125, 0)'
                 )
+
 
             )
 

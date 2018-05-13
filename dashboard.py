@@ -21,6 +21,7 @@ from data import (
 
 
 def main():
+
     # Load the data
     sales = load_sales()
     inventory = load_inventory()
@@ -90,9 +91,14 @@ def main():
             'data': [go.Bar(
                 x=x_inventory,
                 y=y_inventory,
+                marker=dict(
+                    color='rgb(255, 125, 0)'
+                )
 
             )
+
                       ],
+
 
             'layout': go.Layout(
                 xaxis={
@@ -100,7 +106,9 @@ def main():
                     'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
                 },
                 margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-                hovermode='closest'
+                hovermode='closest',
+
+
             )
         }
 

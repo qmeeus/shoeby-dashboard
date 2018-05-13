@@ -113,7 +113,7 @@ def make_title(df, filters):
 def make_selectors(df, filters):
     selectors = [dropdown(title, [None] + sorted(df[title].dropna().unique()), default)
      for title, default in filters]
-    selectors.append(radio('Linear', ['Absolute', 'Relative'], 'Absolute'))
+    selectors.append(radio('Absolute or Relative', ['Absolute', 'Relative'], 'Absolute'))
     return html.Div(
         selectors,
         id="size_dist_selectors",

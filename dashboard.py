@@ -7,7 +7,9 @@ from data import (
     prepare_size_dist,
     load_inventory,
     prepare_inventory,
-    prepare_sales_history
+    prepare_sales_history,
+    prepare_gaps,
+    concat_brand_gaps
 )
 
 
@@ -38,6 +40,7 @@ def main():
     size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')
     sales_history_output = dash.dependencies.Output('sales', 'figure')
     inventory_output = dash.dependencies.Output('inventory-levels', 'figure')
+    brand_gaps_output = dash.dependencies.Output('brand-gaps', 'figure')
 
     # Define the inputs required by the callback function
     inputs = [dash.dependencies.Input('xaxis-column', 'value'),
@@ -109,6 +112,32 @@ def main():
                 hovermode='closest',
 
 
+            )
+        }
+
+    # test
+    @app.callback(brand_gaps_output, inputs)
+    def update_graph_inventory(xaxis_column_name, xaxis_type):
+        inventory_data = prepare_gaps(inventory, Brand=xaxis_column_name, relative=xaxis_type)
+        sales_data = prepare_gaps(sales, Brand=xaxis_column_name, relative=xaxis_type)
+        x_data, y_data = concat_brand_gaps(sales_data, inventory_data)
+        print('test')
+        return {
+
+            'data': [go.Bar(
+                x=x_data,
+                y=y_data,
+
+            )
+            ],
+
+            'layout': go.Layout(
+                xaxis={
+                    'title': xaxis_column_name,
+                    'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
+                },
+                margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+                hovermode='closest'
             )
         }
 

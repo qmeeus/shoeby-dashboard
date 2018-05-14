@@ -61,6 +61,14 @@ def inventory_history():
     )
 
 
+def gaps():
+    return html.Div(
+        [dcc.Graph(id='brand-gaps')],
+        className='six columns',
+        style={'margin-top': '20'}
+    )
+
+
 def make_title(df, filters):
     return html.Div(
         [
@@ -112,7 +120,7 @@ def make_title(df, filters):
 
 def make_selectors(df, filters):
     selectors = [dropdown(title, [None] + sorted(df[title].dropna().unique()), default)
-     for title, default in filters]
+                 for title, default in filters]
     selectors.append(radio('Absolute or Relative', ['Absolute', 'Relative'], 'Absolute'))
     return html.Div(
         selectors,
@@ -125,10 +133,12 @@ def make_graphs():
     size_dist = size_distribution()
     sales_hist = sales_history()
     inventory_level = inventory_history()
+    brand_gaps = gaps()
     return html.Div(
         [
             html.Div([size_dist, sales_hist], className="row"),
             html.Div([inventory_level], className="row"),
+            html.Div([brand_gaps], className="row")
         ]
     )
 

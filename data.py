@@ -3,6 +3,7 @@ import warnings
 import pandas as pd
 import datetime as dt
 from pandas.api.types import CategoricalDtype
+import plotly.graph_objs as go
 
 from config import *
 
@@ -213,7 +214,7 @@ def prepare_data(data, **kwargs):
 def filter_data(data, **kwargs):
     data = data.copy()
     for key, value in kwargs.items():
-        if key in data.columns:
+        if key in data.columns and value is not None:
             data = data.loc[data[key] == value]
 
     return data
@@ -225,7 +226,8 @@ def prepare_size_dist(sales, inventory, **kwargs):
         y_column = "Quantity" if not i else "NetQuantity"
         df = prepare_data(df, **kwargs)
         df = df[["Size", y_column]]
-        grouped = df.groupby("Size").sum()
+        grouped = df.groupby("Size").sum().sort_index()
+        print(grouped.index)
         output.append(grouped.index)
         output.append(grouped[y_column])
 
@@ -253,27 +255,63 @@ def prepare_inventory(data, **kwargs):
 
     return x_data, y_data
 
-def prepare_gaps(data, **kwargs):
-    data = filter_data(data, **kwargs)
-    data = data[["Size", "Brand", "Quantity"]]
-    grouped = data.groupby("Brand", "Size").sum()
-    return grouped
+def prepare_gap_plot(inventory, **kwargs):
+    inventory = filter_data(inventory, **kwargs)
 
+    stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+    sales = inventory[inventory["Sales"] != 0]
+    matenboog_stock = (stocks
+                       .reset_index()
+                       [["Brand", "Size", "NetQuantity"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       .rename(columns={"NetQuantity": "Inventory"})
+                       )
 
-def concat_brand_gaps(sales, inventory):
-    data = pd.concat([inventory, sales], join='outer', axis=1).fillna(0)
-    data = data[data['In'] > 0]
-    data2 = data.groupby(level=0).apply(lambda x: x['In'] / float(x['In'].sum()))
-    data3 = data.groupby(level=0).apply(lambda x: x['Out'] / float(x['Out'].sum()))
-    data2, data3 = pd.DataFrame(data2), pd.DataFrame(data3)
-    data = pd.concat([data2, data3], join='outer', axis=1).fillna(0)
-    data['gap'] = abs(data['In'] - data['Out'])
-    # data = data.groupby('Brand').sum().sort_values('gap', ascending=False)
-    data = data.groupby('Brand').agg({'gap': 'sum'}).sort_values('gap', ascending=False)
+    matenboog_sales = (sales
+                       .reset_index()
+                       [["Brand", "Size", "Sales"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       )
+    matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+    matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
+    gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
+    # gap_summary["gap"].sort_values(ascending=False).plot.bar()
 
-    x_data = data.index
-    y_data = data['gap']
+    x_data, y_data = gap_summary.index, gap_summary["gap"]
     return x_data, y_data
+
+def gap_plot(brand, relative, inventory):
+    x_data, y_data = prepare_gap_plot(
+        inventory,
+        Brand=brand
+    )
+
+    barplot = dict(
+
+        data=[
+            go.Bar(
+                x=x_data,
+                y=y_data,
+                marker=dict(color='rgb(255, 125, 0)')
+            )
+        ],
+        layout=go.Layout(
+            xaxis={
+                'title': brand,
+            },
+            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+            hovermode='closest',
+        ),
+
+    )
+    return barplot
+
 # ----------------------------------------------------------------------------------------
 #                                       UTILS
 # ----------------------------------------------------------------------------------------
@@ -294,6 +332,38 @@ def join_path(filename):
 # DEBUG
 if __name__ == '__main__':
     inventory = load_inventory()
-    # sales = load_sales()
+    sales = load_sales()
+    # concat_brand_gaps(sales, inventory)
     # x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory)
     # print(inventory.columns)
+
+
+
+
+# def prepare_gaps(data, **kwargs):
+#     data = filter_data(data, **kwargs)
+#     data = data[["Size", "Brand", "Quantity"]]
+#     grouped = data.groupby(["Brand", "Size"]).sum()
+#     return grouped
+#
+#
+# def concat_brand_gaps(sales, inventory):
+#     print(0)
+#     sales = sales.rename(columns={"Quantity": "Out"})
+#     inventory = inventory.rename(columns={"Quantity": "In"})
+#     print(1)
+#     data = pd.concat([inventory, sales], join='outer', axis=1).fillna(0)
+#     print(2)
+#     data = data[data['In'] > 0]
+#     data2 = data.groupby(level=0).apply(lambda x: x['In'] / float(x['In'].sum()))
+#     data3 = data.groupby(level=0).apply(lambda x: x['Out'] / float(x['Out'].sum()))
+#     data2, data3 = pd.DataFrame(data2), pd.DataFrame(data3)
+#     data = pd.concat([data2, data3], join='outer', axis=1).fillna(0)
+#     print(data.columns)
+#     data['gap'] = abs(data['In'] - data['Out'])
+#     # data = data.groupby('Brand').sum().sort_values('gap', ascending=False)
+#     data = data.groupby('Brand').agg({'gap': 'sum'}).sort_values('gap', ascending=False)
+#
+#     x_data = data.index
+#     y_data = data['gap']
+#     return x_data, y_data

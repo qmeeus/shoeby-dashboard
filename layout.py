@@ -1,19 +1,40 @@
 import dash_core_components as dcc
 import dash_html_components as html
-
+from controls import make_all_options_dynamic_filter
 
 def dropdown(title, values, default):
     """
     Creates a simple div container with a title and a dropdown.
     The id is set to be used in dashboard.py
     """
+
+
     # TODO: format title
     return html.Div([
         title,
         dcc.Dropdown(
             id='xaxis-column',
             options=[{'label': i, 'value': i} for i in values],
-            value=default)
+            value=default),
+
+        dcc.Dropdown(
+            id='Adult-Children-dropdown',
+            options=[{'label': k, 'value': k} for k in all_options.keys()],
+            value=list(all_options.keys())[2]
+        ),
+
+        html.Hr(),
+
+        dcc.Dropdown(id='Boys-Girl-dropdown'),
+
+        html.Hr(),
+
+        dcc.Dropdown(id='Legs-Torso-values'),
+
+        html.Hr(),
+
+        html.Div(id='display-selected-values')
+
     ])
 
 

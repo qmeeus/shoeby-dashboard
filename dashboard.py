@@ -146,6 +146,39 @@ def main():
             )
         }
 
+    @app.callback(
+        dash.dependencies.Output('Boys-Girl-dropdown', 'options'),
+        [dash.dependencies.Input('Adult-Children-dropdown', 'value')])
+    def set_collection(selected_collection):
+        return [{'label': i, 'value': i} for i in all_options[selected_collection]]
+
+    @app.callback(
+        dash.dependencies.Output('Legs-Torso-values', 'options'),
+        [dash.dependencies.Input('Boys-Girl-dropdown', 'value')])
+    def set_boy_girl(selected_boy_girl):
+        selected_collection = [i for i in all_options.keys() for f in all_options[i] if f == selected_boy_girl]
+        return [{'label': i, 'value': i} for i in all_options[selected_collection[0]][selected_boy_girl]]
+
+        # return [[{'label': k, 'value': k} for i in all_options.keys() for k in all_options[available_option].keys()]]
+
+    @app.callback(
+        dash.dependencies.Output('Legs-Torso-values', 'value'),
+        [dash.dependencies.Input('Legs-Torso-values', 'options')])
+    def set_cities_value(available_option):
+        return [available_option[0]['value']][0]
+
+    @app.callback(
+        dash.dependencies.Output('display-selected-values', 'children'),
+        [dash.dependencies.Input('Adult-Children-dropdown', 'value'),
+         dash.dependencies.Input('Boys-Girl-dropdown', 'value'),
+         dash.dependencies.Input('Legs-Torso-values', 'value')])
+    def set_display_children(selected_collection=None, selected_boy_girl=None, selected_leg_torso=None):
+        if selected_collection == 'OverAll':
+            return 'You are displaying Over All'
+        return u'{} -  {} - {}'.format(
+            selected_collection, selected_boy_girl, selected_leg_torso
+        )
+
     # Run the server
     app.run_server(debug=True)
 

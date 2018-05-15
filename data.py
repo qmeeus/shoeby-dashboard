@@ -227,7 +227,7 @@ def prepare_size_dist(sales, inventory, **kwargs):
         df = prepare_data(df, **kwargs)
         df = df[["Size", y_column]]
         grouped = df.groupby("Size").sum().sort_index()
-        print(grouped.index)
+        # print(grouped.index)
         output.append(grouped.index)
         output.append(grouped[y_column])
 
@@ -279,6 +279,8 @@ def prepare_gap_plot(inventory, **kwargs):
                        .apply(lambda x: x / float(x.sum()))
                        )
     matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+    if len(matenboog) == 0:
+        return None, None
     matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
     # gap_summary["gap"].sort_values(ascending=False).plot.bar()

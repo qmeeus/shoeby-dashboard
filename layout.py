@@ -158,8 +158,7 @@ def make_graphs():
     return html.Div(
         [
             html.Div([size_dist, sales_hist], className="row"),
-            html.Div([inventory_level], className="row"),
-            html.Div([brand_gaps], className="row")
+            html.Div([inventory_level, brand_gaps], className="row"),
         ]
     )
 

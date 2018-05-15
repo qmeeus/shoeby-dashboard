@@ -8,7 +8,7 @@ def dropdown(title, values, default):
     The id is set to be used in dashboard.py
     """
 
-
+    all_options = make_all_options_dynamic_filter()
     # TODO: format title
     return html.Div([
         title,

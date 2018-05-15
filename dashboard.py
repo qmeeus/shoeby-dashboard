@@ -11,6 +11,7 @@ from data import (
     prepare_gaps,
     concat_brand_gaps
 )
+from controls import make_all_options_dynamic_filter
 
 
 # TODO: How to include pyplot & seaborn plots in dash?
@@ -35,6 +36,9 @@ def main():
 
     # Set the layout (HTML/CSS)
     app.layout = build_page(sales, [("Brand", "EKS")])
+
+    #Importing the dynamic dropdown
+    all_options = make_all_options_dynamic_filter()
 
     # Define the outputs required by the callback function
     size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')

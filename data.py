@@ -109,7 +109,7 @@ def build_inventory():
         .groupby(["posting_date", "Brand", "Item No_", "Size", "Color"])
         .agg({
             column: 'max' for column in final_column_selection})
-        .reset_index()
+.reset_index()
         .set_index("posting_date")
         .pipe(filter_sizes)
 
@@ -246,6 +246,7 @@ def prepare_sales_history(sales, **kwargs):
 
 def prepare_inventory(data, **kwargs):
     data = filter_data(data, **kwargs)
+
     data = data[["Size", "NetQuantity"]]
     grouped = data.groupby("Size").sum()
     x_data = grouped.index

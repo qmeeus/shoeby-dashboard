@@ -48,11 +48,15 @@ def main():
 
     # Define the inputs required by the callback function
     inputs = [dash.dependencies.Input('xaxis-column', 'value'),
-              dash.dependencies.Input('xaxis-type', 'value'), ]
+              dash.dependencies.Input('xaxis-type', 'value'),
+              dash.dependencies.Input('Adult-Children-dropdown', 'value'),
+              dash.dependencies.Input('Boys-Girl-dropdown', 'value'),
+              dash.dependencies.Input('Legs-Torso-values', 'value'),
+              ]
 
     @app.callback(size_dist_output, inputs)
-    def make_size_distribution(xaxis_column_name, xaxis_type):
-        x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory, Brand=xaxis_column_name, relative=xaxis_type)
+    def make_size_distribution(xaxis_column_name, xaxis_type, Adult_Children_dropdown, Boys_Girl_dropdown, legs_torso_values  ):
+        x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory, Brand=xaxis_column_name, relative=xaxis_type,Adult=Adult_Children_dropdown, Gender=Boys_Girl_dropdown, Bodypart=legs_torso_values   )
 
         return {
             'data': [go.Bar(

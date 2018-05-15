@@ -8,7 +8,8 @@ from data import (
     load_inventory,
     prepare_inventory,
     prepare_sales_history,
-    gap_plot
+    gap_plot,
+    group_brands
 )
 from controls import make_all_options_dynamic_filter
 
@@ -26,6 +27,7 @@ def main():
 
     # Load the data
     sales = load_sales()
+    sales = group_brands(sales)
     inventory = load_inventory()
 
     # Create the dashboard

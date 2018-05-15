@@ -4,7 +4,7 @@ import plotly.graph_objs as go
 from layout import build_page
 from data import (
     load_sales,
-    prepare_size_dist,
+    size_dist_plot,
     load_inventory,
     prepare_inventory,
     prepare_sales_history,
@@ -53,35 +53,8 @@ def main():
 
     @app.callback(size_dist_output, inputs)
     def make_size_distribution(xaxis_column_name, xaxis_type):
-        x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory, Brand=xaxis_column_name, relative=xaxis_type)
+        return size_dist_plot(xaxis_column_name, xaxis_type, inventory)
 
-        return {
-            'data': [go.Bar(
-                x=x_sales,
-                y=y_sales,
-                text=y_sales,
-                textposition='auto',
-                name='Sales'
-            ), go.Bar(
-            x=x_inventory,
-            y=y_inventory,
-                text=y_inventory,
-                textposition='auto',
-                name='Stock levels',
-                marker=dict(
-            color='rgb(255, 125, 0)'
-        )
-        )],
-
-            'layout': go.Layout(
-                xaxis={
-                    'title': xaxis_column_name,
-                    'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
-                },
-                margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-                hovermode='closest'
-            )
-        }
 
     @app.callback(sales_history_output, inputs)
     def make_sales_history(xaxis_column_name, xaxis_type):

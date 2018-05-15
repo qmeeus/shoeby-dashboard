@@ -221,18 +221,72 @@ def filter_data(data, **kwargs):
     return data
 
 
-def prepare_size_dist(sales, inventory, **kwargs):
-    output = []
-    for i, df in enumerate([sales, inventory]):
-        y_column = "Quantity" if not i else "NetQuantity"
-        df = prepare_data(df, **kwargs)
-        df = df[["Size", y_column]]
-        grouped = df.groupby("Size").sum().sort_index()
-        print(grouped.head())
-        output.append(grouped.index)
-        output.append(grouped[y_column])
+def prepare_size_dist(inventory, **kwargs):
+    inventory = filter_data(inventory, **kwargs)
 
-    return output
+    stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+    sales = inventory[inventory["Sales"] != 0]
+    matenboog_stock = (stocks
+                       .reset_index()
+                       [["Brand", "Size", "NetQuantity"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       .rename(columns={"NetQuantity": "Inventory"})
+                       )
+
+    matenboog_sales = (sales
+                       .reset_index()
+                       [["Brand", "Size", "Sales"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       )
+    matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+    if len(matenboog) == 0:
+        return None, None
+    gap_summary = matenboog.groupby(level=1).agg(lambda s: abs(s).sum())
+    x_sales, y_sales = gap_summary.index, gap_summary["Sales"]
+    x_inventory, y_inventory = gap_summary.index, gap_summary["Inventory"]
+    return x_sales, y_sales, x_inventory, y_inventory
+
+
+def size_dist_plot(brand, relative, inventory):
+    x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(
+        inventory,
+        Brand=brand
+    )
+    barplot = dict(
+
+        data=[
+            go.Bar(
+                x=x_sales,
+                y=y_sales,
+                text=y_sales,
+                textposition='auto',
+                name='Sales'
+
+            ), go.Bar(
+                x=x_inventory,
+                y=y_inventory,
+                text=y_inventory,
+                textposition='auto',
+                name='Stock levels',
+                marker=dict(color='rgb(255, 125, 0)')
+            )
+        ],
+        layout=go.Layout(
+            xaxis={
+                'title': brand,
+            },
+            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+            hovermode='closest',
+        ),
+
+    )
+    return barplot
 
 
 def prepare_sales_history(sales, **kwargs):
@@ -247,6 +301,7 @@ def prepare_sales_history(sales, **kwargs):
     data = data.resample(frequency).sum()
     return data.index, data.values
 
+
 def prepare_inventory(data, **kwargs):
     data = filter_data(data, **kwargs)
     data = data[["Size", "NetQuantity"]]
@@ -255,6 +310,7 @@ def prepare_inventory(data, **kwargs):
     y_data = grouped["NetQuantity"]
 
     return x_data, y_data
+
 
 def prepare_gap_plot(inventory, **kwargs):
     inventory = filter_data(inventory, **kwargs)
@@ -284,10 +340,10 @@ def prepare_gap_plot(inventory, **kwargs):
         return None, None
     matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
-    # gap_summary["gap"].sort_values(ascending=False).plot.bar()
 
     x_data, y_data = gap_summary.index, gap_summary["gap"]
     return x_data, y_data
+
 
 def gap_plot(brand, relative, inventory):
     x_data, y_data = prepare_gap_plot(
@@ -301,7 +357,7 @@ def gap_plot(brand, relative, inventory):
             go.Bar(
                 x=x_data,
                 y=y_data,
-                text=round(y_data,2),
+                text=y_data,
                 textposition='auto',
                 marker=dict(color='rgb(255, 125, 0)')
             )
@@ -355,7 +411,6 @@ def join_path(filename):
 # DEBUG
 if __name__ == '__main__':
     inventory = load_inventory()
-    print(inventory.Size.dtype)
     # sales = load_sales()
     # concat_brand_gaps(sales, inventory)
     # x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory)

@@ -253,6 +253,27 @@ def prepare_inventory(data, **kwargs):
 
     return x_data, y_data
 
+def prepare_gaps(data, **kwargs):
+    data = filter_data(data, **kwargs)
+    data = data[["Size", "Brand", "Quantity"]]
+    grouped = data.groupby("Brand", "Size").sum()
+    return grouped
+
+
+def concat_brand_gaps(sales, inventory):
+    data = pd.concat([inventory, sales], join='outer', axis=1).fillna(0)
+    data = data[data['In'] > 0]
+    data2 = data.groupby(level=0).apply(lambda x: x['In'] / float(x['In'].sum()))
+    data3 = data.groupby(level=0).apply(lambda x: x['Out'] / float(x['Out'].sum()))
+    data2, data3 = pd.DataFrame(data2), pd.DataFrame(data3)
+    data = pd.concat([data2, data3], join='outer', axis=1).fillna(0)
+    data['gap'] = abs(data['In'] - data['Out'])
+    # data = data.groupby('Brand').sum().sort_values('gap', ascending=False)
+    data = data.groupby('Brand').agg({'gap': 'sum'}).sort_values('gap', ascending=False)
+
+    x_data = data.index
+    y_data = data['gap']
+    return x_data, y_data
 # ----------------------------------------------------------------------------------------
 #                                       UTILS
 # ----------------------------------------------------------------------------------------

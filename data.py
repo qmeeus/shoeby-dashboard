@@ -411,38 +411,5 @@ def join_path(filename):
 # DEBUG
 if __name__ == '__main__':
     inventory = load_inventory()
-    # sales = load_sales()
-    # concat_brand_gaps(sales, inventory)
-    # x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory)
-    # print(inventory.columns)
 
 
-
-
-# def prepare_gaps(data, **kwargs):
-#     data = filter_data(data, **kwargs)
-#     data = data[["Size", "Brand", "Quantity"]]
-#     grouped = data.groupby(["Brand", "Size"]).sum()
-#     return grouped
-#
-#
-# def concat_brand_gaps(sales, inventory):
-#     print(0)
-#     sales = sales.rename(columns={"Quantity": "Out"})
-#     inventory = inventory.rename(columns={"Quantity": "In"})
-#     print(1)
-#     data = pd.concat([inventory, sales], join='outer', axis=1).fillna(0)
-#     print(2)
-#     data = data[data['In'] > 0]
-#     data2 = data.groupby(level=0).apply(lambda x: x['In'] / float(x['In'].sum()))
-#     data3 = data.groupby(level=0).apply(lambda x: x['Out'] / float(x['Out'].sum()))
-#     data2, data3 = pd.DataFrame(data2), pd.DataFrame(data3)
-#     data = pd.concat([data2, data3], join='outer', axis=1).fillna(0)
-#     print(data.columns)
-#     data['gap'] = abs(data['In'] - data['Out'])
-#     # data = data.groupby('Brand').sum().sort_values('gap', ascending=False)
-#     data = data.groupby('Brand').agg({'gap': 'sum'}).sort_values('gap', ascending=False)
-#
-#     x_data = data.index
-#     y_data = data['gap']
-#     return x_data, y_data

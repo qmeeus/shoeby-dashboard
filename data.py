@@ -148,13 +148,14 @@ def load_inventory():
     filename = INVENTORY
     path = join_path(filename)
     if not os.path.exists(path):
-        sales = build_inventory()
-        sales.to_csv(path)
-        return sales
+        inventory = build_inventory()
+        inventory.to_csv(path)
+        return inventory
     return (
         pd.read_csv(path)
         .assign(posting_date=lambda df: pd.to_datetime(df["posting_date"]))
         .set_index("posting_date")
+        .pipe(filter_sizes)
     )
 
 # ----------------------------------------------------------------------------------------
@@ -227,7 +228,7 @@ def prepare_size_dist(sales, inventory, **kwargs):
         df = prepare_data(df, **kwargs)
         df = df[["Size", y_column]]
         grouped = df.groupby("Size").sum().sort_index()
-        # print(grouped.index)
+        print(grouped.head())
         output.append(grouped.index)
         output.append(grouped[y_column])
 
@@ -300,6 +301,8 @@ def gap_plot(brand, relative, inventory):
             go.Bar(
                 x=x_data,
                 y=y_data,
+                text=round(y_data,2),
+                textposition='auto',
                 marker=dict(color='rgb(255, 125, 0)')
             )
         ],
@@ -353,7 +356,8 @@ def join_path(filename):
 # DEBUG
 if __name__ == '__main__':
     inventory = load_inventory()
-    sales = load_sales()
+    print(inventory.Size.dtype)
+    # sales = load_sales()
     # concat_brand_gaps(sales, inventory)
     # x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory)
     # print(inventory.columns)

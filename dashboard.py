@@ -57,10 +57,14 @@ def main():
             'data': [go.Bar(
                 x=x_sales,
                 y=y_sales,
+                text=y_sales,
+                textposition='auto',
                 name='Sales'
             ), go.Bar(
             x=x_inventory,
             y=y_inventory,
+                text=y_inventory,
+                textposition='auto',
                 name='Stock levels',
                 marker=dict(
             color='rgb(255, 125, 0)'

@@ -330,10 +330,9 @@ def replace_brand(brand):
 
 
 def group_brands(df):
-    brands = ['clt', 'sense', 'eksept', 'refill']
+    brands = ['cu','jill','blend','veromoda','clt', 'sense', 'eksept', 'refill']
     for i in range(len(brands)):
         df.Brand = df.Brand.replace(replace_brand(brands[i]))
-
     return df
 
 # ----------------------------------------------------------------------------------------

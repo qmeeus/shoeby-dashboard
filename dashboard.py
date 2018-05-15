@@ -10,6 +10,7 @@ from data import (
     prepare_sales_history,
     gap_plot
 )
+from controls import make_all_options_dynamic_filter
 
 
 # TODO: How to include pyplot & seaborn plots in dash?
@@ -35,6 +36,9 @@ def main():
     # Set the layout (HTML/CSS)
     app.layout = build_page(sales, [("Brand", "EKS")])
 
+    #Importing the dynamic dropdown
+    all_options = make_all_options_dynamic_filter()
+
     # Define the outputs required by the callback function
     size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')
     sales_history_output = dash.dependencies.Output('sales', 'figure')
@@ -57,8 +61,11 @@ def main():
             ), go.Bar(
             x=x_inventory,
             y=y_inventory,
-                name='StockLevels'
-            )],
+                name='Stock levels',
+                marker=dict(
+            color='rgb(255, 125, 0)'
+        )
+        )],
 
             'layout': go.Layout(
                 xaxis={
@@ -93,9 +100,11 @@ def main():
             'data': [go.Bar(
                 x=x_inventory,
                 y=y_inventory,
+                name='Stock levels1',
                 marker=dict(
                     color='rgb(255, 125, 0)'
                 )
+
 
             )
 
@@ -119,6 +128,39 @@ def main():
     def update_graph_inventory(xaxis_column_name, xaxis_type):
         return gap_plot(xaxis_column_name, xaxis_type, inventory)
 
+
+    @app.callback(
+        dash.dependencies.Output('Boys-Girl-dropdown', 'options'),
+        [dash.dependencies.Input('Adult-Children-dropdown', 'value')])
+    def set_collection(selected_collection):
+        return [{'label': i, 'value': i} for i in all_options[selected_collection]]
+
+    @app.callback(
+        dash.dependencies.Output('Legs-Torso-values', 'options'),
+        [dash.dependencies.Input('Boys-Girl-dropdown', 'value')])
+    def set_boy_girl(selected_boy_girl):
+        selected_collection = [i for i in all_options.keys() for f in all_options[i] if f == selected_boy_girl]
+        return [{'label': i, 'value': i} for i in all_options[selected_collection[0]][selected_boy_girl]]
+
+        # return [[{'label': k, 'value': k} for i in all_options.keys() for k in all_options[available_option].keys()]]
+
+    @app.callback(
+        dash.dependencies.Output('Legs-Torso-values', 'value'),
+        [dash.dependencies.Input('Legs-Torso-values', 'options')])
+    def set_cities_value(available_option):
+        return [available_option[0]['value']][0]
+
+    @app.callback(
+        dash.dependencies.Output('display-selected-values', 'children'),
+        [dash.dependencies.Input('Adult-Children-dropdown', 'value'),
+         dash.dependencies.Input('Boys-Girl-dropdown', 'value'),
+         dash.dependencies.Input('Legs-Torso-values', 'value')])
+    def set_display_children(selected_collection=None, selected_boy_girl=None, selected_leg_torso=None):
+        if selected_collection == 'OverAll':
+            return 'You are displaying Over All'
+        return u'{} -  {} - {}'.format(
+            selected_collection, selected_boy_girl, selected_leg_torso
+        )
 
     # Run the server
     app.run_server(debug=True)

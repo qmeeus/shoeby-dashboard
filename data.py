@@ -312,6 +312,25 @@ def gap_plot(brand, relative, inventory):
     )
     return barplot
 
+
+# Added by Wesley
+def load_brand(brand):
+    with open('./BrandBin/' + brand + '.txt') as f:
+        return [col.split(', ') for col in f.readlines()][0]
+
+
+def replace_brand(brand):
+    brand_name = brand.upper()
+    return {e: brand_name for e in load_brand(brand)}
+
+
+def group_brands(df):
+    brands = ['clt', 'sense', 'eksept', 'refill']
+    for i in range(len(brands)):
+        df.Brand = df.Brand.replace(replace_brand(brands[i]))
+
+    return df
+
 # ----------------------------------------------------------------------------------------
 #                                       UTILS
 # ----------------------------------------------------------------------------------------

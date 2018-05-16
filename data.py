@@ -6,6 +6,7 @@ from pandas.api.types import CategoricalDtype
 import plotly.graph_objs as go
 
 from config import *
+from controls import SIZES
 
 # ----------------------------------------------------------------------------------------
 #                            EXTRACT - TRANSFORM - LOAD
@@ -169,7 +170,7 @@ def load_inventory():
 def filter_sizes(data):
     # Select relevant sizes
     data = data.copy()
-    sizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
+    sizes = SIZES
     column_name = "Size"
     categorical_size_type = CategoricalDtype(categories=sizes, ordered=True)
     data = data[data[column_name].isin(sizes)]
@@ -316,80 +317,17 @@ def prepare_inventory(data, **kwargs):
     return x_data, y_data
 
 
-# def prepare_gap_plot(inventory, **kwargs):
-#     inventory = filter_data(inventory, **kwargs)
-#
-#     stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
-#     sales = inventory[inventory["Sales"] != 0]
-#     matenboog_stock = (stocks
-#                        .reset_index()
-#                        [["Brand", "Size", "NetQuantity"]]
-#                        .groupby(["Brand", "Size"])
-#                        .sum()
-#                        .groupby("Brand")
-#                        .apply(lambda x: x / float(x.sum()))
-#                        .rename(columns={"NetQuantity": "Inventory"})
-#                        )
-#
-#     matenboog_sales = (sales
-#                        .reset_index()
-#                        [["Brand", "Size", "Sales"]]
-#                        .groupby(["Brand", "Size"])
-#                        .sum()
-#                        .groupby("Brand")
-#                        .apply(lambda x: x / float(x.sum()))
-#                        )
-#     matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
-#     if len(matenboog) == 0:
-#         return None, None
-#     matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
-#     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
-#
-#     x_data, y_data = gap_summary.index, gap_summary["gap"]
-#     return x_data, y_data
-#
-#
-# def gap_plot(brand, relative, inventory):
-#     x_data, y_data = prepare_gap_plot(
-#         inventory,
-#         Brand=brand
-#     )
-#
-#     barplot = dict(
-#
-#         data=[
-#             go.Bar(
-#                 x=x_data,
-#                 y=y_data,
-#                 text=y_data,
-#                 textposition='auto',
-#                 marker=dict(color='rgb(255, 125, 0)')
-#             )
-#         ],
-#         layout=go.Layout(
-#             xaxis={
-#                 'title': brand,
-#             },
-#             margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-#             hovermode='closest',
-#         ),
-#
-#     )
-#     return barplot
-
-
-# Added by Wesley
-def load_brand(brand):
-    with open('./BrandBin/' + brand + '.txt') as f:
-        return [col.split(', ') for col in f.readlines()][0]
-
-
-def replace_brand(brand):
-    brand_name = brand.upper()
-    return {e: brand_name for e in load_brand(brand)}
-
-
 def group_brands(df):
+
+    def load_brand(brand):
+        with open('./BrandBin/' + brand + '.txt') as f:
+            return [col.split(', ') for col in f.readlines()][0]
+
+
+    def replace_brand(brand):
+        brand_name = brand.upper()
+        return {e: brand_name for e in load_brand(brand)}
+
     brands = ['cu','jill','blend','veromoda','clt', 'sense', 'eksept', 'refill']
     for i in range(len(brands)):
         df.Brand = df.Brand.replace(replace_brand(brands[i]))

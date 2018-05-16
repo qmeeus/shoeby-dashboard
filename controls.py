@@ -1,6 +1,6 @@
 
 
-CATEGORIES = {}
+SIZES = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
 
 BRANDS = {
     'EKS_SIL': "EKSEPT Silver",

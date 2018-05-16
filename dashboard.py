@@ -4,7 +4,6 @@ from dash.dependencies import Input, Output
 from data import load_sales, load_inventory
 from layout import make_layout
 import callbacks
-import calendar
 
 # TODO: How to include pyplot & seaborn plots in dash?
 # TODO: Dynamic filters
@@ -51,23 +50,23 @@ def main():
     @app.callback(Output('year_text', 'children'),
                   [Input('month_slider', 'value')])
     def update_year_text(month_slider):
-        return "{} | {}".format(calendar.month_abbr[month_slider[0]], calendar.month_abbr[month_slider[1]])
+        return callbacks.update_year_text(month_slider)
     
     # Selectors -> gap text
     @app.callback(Output('gap_text', 'children'),
-                  [Input('brands', 'value'),
-                   Input('categories', 'value'),
+                  [Input('categories', 'value'),
+                   Input('brands', 'value'),
                    Input('month_slider', 'value')])
-    def update_brand_text(brands, categories, month_slider):
-        return callbacks.update_brand_text(inventory, brands, categories, month_slider)
+    def update_brand_text(categories, brands, month_slider):
+        return callbacks.update_brand_text(inventory, categories, brands, month_slider)
 
-        # Selectors -> production text
+    # Selectors -> production text
     @app.callback(Output('production_text', 'children'),
-                  [Input('brands', 'value'),
-                   Input('categories', 'value'),
+                  [Input('categories', 'value'),
+                   Input('brands', 'value'),
                    Input('month_slider', 'value')])
-    def update_production_text(brands, categories, month_slider):
-        return callbacks.update_production_text(inventory, brands, categories, month_slider)
+    def update_production_text(categories, brands, month_slider):
+        return callbacks.update_gap_text(inventory, categories, brands, month_slider)
 
     # Selectors -> matenboog
     @app.callback(Output('matenboog', 'figure'),
@@ -95,101 +94,15 @@ def main():
     def size_gap(categories, brands, month_slider):
         return callbacks.size_gap(inventory, categories, brands, month_slider)
 
+    # Selectors -> pie graph
+    @app.callback(Output('pie_graph', 'figure'),
+                  [Input('categories', 'value'),
+                   Input('brands', 'value'),
+                   Input('month_slider', 'value'),
+                   Input('relative_selector', 'values')])
+    def pie_graph(categories, brands, month_slider, relative_selector):
+        return callbacks.pie_graph(sales, categories, brands, month_slider, relative_selector)
 
-    # Set the layout (HTML/CSS)
-    # app.layout = build_page(sales, [("Brand", "EKS")])
-
-    # #Importing the dynamic dropdown
-    # all_options = make_all_options_dynamic_filter()
-    #
-    # # Define the outputs required by the callback function
-    # size_dist_output = Output('indicator-graphic', 'figure')
-    # sales_history_output = Output('sales', 'figure')
-    # inventory_output = Output('inventory-levels', 'figure')
-    # brand_gaps_output = Output('brand-gaps', 'figure')
-    #
-    # # Define the inputs required by the callback function
-    # inputs = [.Input('xaxis-column', 'value'),
-    #           .Input('xaxis-type', 'value'), ]
-    #
-    # @app.callback(size_dist_output, inputs)
-    # def make_size_distribution(xaxis_column_name, xaxis_type):
-    #     return size_dist_plot(xaxis_column_name, xaxis_type, inventory)
-    #
-    #
-    #
-    # @app.callback(inventory_output, inputs)
-    # def make_inventory_level(xaxis_column_name, xaxis_type):
-    #     x_inventory, y_inventory = prepare_inventory(inventory, Brand=xaxis_column_name, relative=xaxis_type)
-    #
-    #     return {
-    #
-    #         'data': [go.Bar(
-    #             x=x_inventory,
-    #             y=y_inventory,
-    #             name='Stock levels1',
-    #             marker=dict(
-    #                 color='rgb(255, 125, 0)'
-    #             )
-    #
-    #
-    #         )
-    #
-    #                   ],
-    #
-    #
-    #         'layout': go.Layout(
-    #             xaxis={
-    #                 'title': xaxis_column_name,
-    #                 'type': 'Relative' if xaxis_type == 'Relative' else 'Absolute'
-    #             },
-    #             margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-    #             hovermode='closest',
-    #
-    #
-    #         )
-    #     }
-    #
-    #
-    # @app.callback(brand_gaps_output, inputs)
-    # def update_graph_inventory(xaxis_column_name, xaxis_type):
-    #     return gap_plot(xaxis_column_name, xaxis_type, inventory)
-    #
-    #
-    # @app.callback(
-    #     .Output('Boys-Girl-dropdown', 'options'),
-    #     [.Input('Adult-Children-dropdown', 'value')])
-    # def set_collection(selected_collection):
-    #     return [{'label': i, 'value': i} for i in all_options[selected_collection]]
-    #
-    # @app.callback(
-    #     .Output('Legs-Torso-values', 'options'),
-    #     [.Input('Boys-Girl-dropdown', 'value')])
-    # def set_boy_girl(selected_boy_girl):
-    #     selected_collection = [i for i in all_options.keys() for f in all_options[i] if f == selected_boy_girl]
-    #     return [{'label': i, 'value': i} for i in all_options[selected_collection[0]][selected_boy_girl]]
-    #
-    #     # return [[{'label': k, 'value': k} for i in all_options.keys() for k in all_options[available_option].keys()]]
-    #
-    # @app.callback(
-    #     .Output('Legs-Torso-values', 'value'),
-    #     [.Input('Legs-Torso-values', 'options')])
-    # def set_cities_value(available_option):
-    #     return [available_option[0]['value']][0]
-    #
-    # @app.callback(
-    #     .Output('display-selected-values', 'children'),
-    #     [.Input('Adult-Children-dropdown', 'value'),
-    #      .Input('Boys-Girl-dropdown', 'value'),
-    #      .Input('Legs-Torso-values', 'value')])
-    # def set_display_children(selected_collection=None, selected_boy_girl=None, selected_leg_torso=None):
-    #     if selected_collection == 'OverAll':
-    #         return 'You are displaying Over All'
-    #     return u'{} -  {} - {}'.format(
-    #         selected_collection, selected_boy_girl, selected_leg_torso
-    #     )
-
-    # Run the server
     app.run_server(debug=True)
 
 

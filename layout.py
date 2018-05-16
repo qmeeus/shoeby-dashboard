@@ -1,7 +1,7 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
-from controls import CATEGORIES, BRANDS, FREQUENCIES
+from controls import SIZES, BRANDS, FREQUENCIES
 
 
 def make_options(options_dict):
@@ -31,7 +31,7 @@ def default_graph_layout():
 def make_layout():
 
     sampling_options = make_options(FREQUENCIES)
-    categorie_options = make_options(CATEGORIES)
+    size_options = [{'label': option, 'value': option} for option in SIZES]
     brand_options = make_options(BRANDS)
 
     layout = html.Div(
@@ -126,7 +126,7 @@ def make_layout():
                             ),
                             dcc.Dropdown(
                                 id='categories',
-                                options=categorie_options,
+                                options=size_options,
                                 multi=True,
                                 value=[]
                             )

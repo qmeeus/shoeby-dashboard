@@ -47,11 +47,11 @@ def build_sales():
         .dropna(how='all', axis=1)
         .pipe(lambda df: df.where(~df.Description.isin(exclude)).dropna())
         .set_index("order_date")
-        .groupby([pd.Grouper(freq=SAMPLING), "Horizontal Component Code"] + list(map(lambda x: x[0], FILTERS)))
+        .rename(columns={"Horizontal Component Code": "Size"})
+        .groupby([pd.Grouper(freq=SAMPLING), "Size"] + list(map(lambda x: x[0], FILTERS)))
         .aggregate({"Quantity": 'sum', "Quantity Returned": 'sum'})
         .reset_index()
         .set_index("order_date")
-        .rename(columns={"Horizontal Component Code": "Size"})
         .pipe(filter_sizes)
 
     )
@@ -141,6 +141,8 @@ def load_sales():
         pd.read_csv(path)
         .assign(order_date=lambda df: pd.to_datetime(df["order_date"]))
         .set_index("order_date")
+        .pipe(filter_sizes)
+
     )
 
 
@@ -165,10 +167,11 @@ def load_inventory():
 
 def filter_sizes(data):
     # Select relevant sizes
+    data = data.copy()
     sizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
     column_name = "Size"
     categorical_size_type = CategoricalDtype(categories=sizes, ordered=True)
-    data = data[data[column_name].isin(sizes)].copy()
+    data = data[data[column_name].isin(sizes)]
     data[column_name] = data[column_name].astype(categorical_size_type)
     return data
 

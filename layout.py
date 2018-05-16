@@ -2,40 +2,147 @@ import dash_core_components as dcc
 import dash_html_components as html
 from controls import make_all_options_dynamic_filter
 
-def dropdown(title, values, default):
+
+def build_page(inventory, filters):
+    # TODO: Create and organise the filters in config.py
+    # TODO: Position of the dropdown vs. graphs in html/css
+    # TODO: Make filters dynamic
+    """
+    Create a div containers composed of filters and a histogram
+    """
+
+    # Add stylesheet
+    dcc._css_dist[0]['relative_package_path'].append("resources/stylesheet.css")
+
+    # Make the title
+    title = make_title(inventory, filters)
+
+    # Make the graphs
+    graphs = make_graphs()
+
+    # Return the whole layout
+    page = html.Div(
+        [
+            title,
+            selectors,
+            graphs
+        ],
+        className='ten columns offset-by-one'
+    )
+    return page
+
+
+def make_title(df, filters):
+    title = html.Div(
+        [
+            html.Div(
+                [
+                    html.H1(
+                        'Shoeby Sales & Inventory - Overview',
+                        className='eight columns',
+                    ),
+                    html.Img(
+                        src="https://www.shoeby.nl/skin/frontend/shoeby/default/images/shoeby_logo.svg",
+                        className='one columns',
+                        style={
+                            'height': '71',
+                            'width': '170',
+                            'float': 'right',
+                            'position': 'relative',
+                        },
+                    ),
+                ],
+                className='row'
+            ),
+            html.Div(
+                [
+                    html.H5(
+                        '',
+                        id='inventory_text',
+                        className='two columns'
+                    ),
+                    html.H5(
+                        '',
+                        id='gap_text',
+                        className='eight columns',
+                        style={'text-align': 'center'}
+                    ),
+                    html.H5(
+                        '',
+                        id='year_text',
+                        className='two columns',
+                        style={'text-align': 'right'}
+                    ),
+                ],
+                className='row'
+            ),
+
+            make_selectors(df, filters)
+        ]
+    )
+    return title
+
+
+def make_selectors(df, filters):
+
+    all_options = make_all_options_dynamic_filter()
+
+    right_list = html.Div(
+        [dropdown(title, [None] + sorted(df[title].dropna().unique()), default)
+         for title, default in filters],
+        className='six columns'
+    )
+
+    left_list = html.Div(
+        [dropdown("Adult Children", all_options, list(all_options.keys())[2]),
+         html.Hr(),
+         dropdown("Leg Torso", [], None, id='Legs-Torso-values'),
+         html.Hr(),
+         html.Div(id='display-selected-values')],
+        className='six columns',
+
+    )
+
+    selectors = html.Div(
+        [right_list, left_list],
+        id="size_dist_selectors",
+        # style={'width': '48%', 'display': 'inline-block'},
+        className="row"
+    )
+
+    return selectors
+
+
+def make_graphs():
+
+    graph_wrapper = html.Div(
+        [
+            html.Div([size_distribution(), sales_history()], className="row"),
+            html.Hr(),
+            html.Div([inventory_history(), gaps()], className="row"),
+        ]
+    )
+
+    return graph_wrapper
+
+
+def dropdown(title, values, default, id='xaxis-column'):
     """
     Creates a simple div container with a title and a dropdown.
     The id is set to be used in dashboard.py
     """
 
-    all_options = make_all_options_dynamic_filter()
-    # TODO: format title
-    return html.Div([
-        title,
-        dcc.Dropdown(
-            id='xaxis-column',
-            options=[{'label': i, 'value': i} for i in values],
-            value=default),
+    dropdown = html.Div(
+        [
+            title,
+            dcc.Dropdown(
+                id=id,
+                options=[{'label': i, 'value': i} for i in values],
+                value=default)
+        ]
+    )
 
-        dcc.Dropdown(
-            id='Adult-Children-dropdown',
-            options=[{'label': k, 'value': k} for k in all_options.keys()],
-            value=list(all_options.keys())[2]
-        ),
-
-        html.Hr(),
-
-        dcc.Dropdown(id='Boys-Girl-dropdown'),
-
-        html.Hr(),
-
-        dcc.Dropdown(id='Legs-Torso-values'),
-
-        html.Hr(),
-
-        html.Div(id='display-selected-values')
-
-    ])
+    return dropdown
 
 
 def radio(title, values, default):
@@ -90,79 +197,6 @@ def gaps():
     )
 
 
-def make_title(df, filters):
-    return html.Div(
-        [
-            html.Div(
-                [
-                    html.H1(
-                        'Shoeby Sales & Inventory - Overview',
-                        className='eight columns',
-                    ),
-                    html.Img(
-                        src="https://www.shoeby.nl/skin/frontend/shoeby/default/images/shoeby_logo.svg",
-                        className='one columns',
-                        style={
-                            'height': '71',
-                            'width': '170',
-                            'float': 'right',
-                            'position': 'relative',
-                        },
-                    ),
-                ],
-                className='row'
-            ),
-            html.Div(
-                [
-                    html.H5(
-                        '',
-                        id='inventory_text',
-                        className='two columns'
-                    ),
-                    html.H5(
-                        '',
-                        id='gap_text',
-                        className='eight columns',
-                        style={'text-align': 'center'}
-                    ),
-                    html.H5(
-                        '',
-                        id='year_text',
-                        className='two columns',
-                        style={'text-align': 'right'}
-                    ),
-                ],
-                className='row'
-            ),
-            make_selectors(df, filters)
-        ]
-    )
-
-
-def make_selectors(df, filters):
-    selectors = [dropdown(title, [None] + sorted(df[title].dropna().unique()), default)
-                 for title, default in filters]
-    selectors.append(radio('Absolute or Relative', ['Absolute', 'Relative'], 'Absolute'))
-    return html.Div(
-        selectors,
-        id="size_dist_selectors",
-        style={'width': '48%', 'display': 'inline-block'}
-    )
-
-
-def make_graphs():
-    size_dist = size_distribution()
-    sales_hist = sales_history()
-    inventory_level = inventory_history()
-    brand_gaps = gaps()
-    return html.Div(
-        [
-            html.Div([size_dist, sales_hist], className="row"),
-            html.Div([inventory_level, brand_gaps], className="row"),
-        ]
-    )
-
-
 def make_graph_layout(**kwargs):
     layout = dict(
         autosize=True,
@@ -184,30 +218,3 @@ def make_graph_layout(**kwargs):
     for key, value in kwargs:
         layout[key] = value
     return layout
-
-
-def build_page(inventory, filters):
-    # TODO: Create and organise the filters in config.py
-    # TODO: Position of the dropdown vs. graphs in html/css
-    # TODO: Make filters dynamic
-    """
-    Create a div containers composed of filters and a histogram
-    """
-
-    # Add stylesheet
-    dcc._css_dist[0]['relative_package_path'].append("resources/stylesheet.css")
-
-    # Make the title
-    title = make_title(inventory, filters)
-
-    # Make the graphs
-    graphs = make_graphs()
-
-    # Return the whole layout
-    return html.Div(
-        [
-            title,
-            graphs
-        ],
-        className='ten columns offset-by-one'
-    )

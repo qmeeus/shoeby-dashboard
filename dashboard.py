@@ -1,4 +1,5 @@
 import dash
+from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 
 from layout import build_page
@@ -42,14 +43,14 @@ def main():
     all_options = make_all_options_dynamic_filter()
 
     # Define the outputs required by the callback function
-    size_dist_output = dash.dependencies.Output('indicator-graphic', 'figure')
-    sales_history_output = dash.dependencies.Output('sales', 'figure')
-    inventory_output = dash.dependencies.Output('inventory-levels', 'figure')
-    brand_gaps_output = dash.dependencies.Output('brand-gaps', 'figure')
+    size_dist_output = Output('indicator-graphic', 'figure')
+    sales_history_output = Output('sales', 'figure')
+    inventory_output = Output('inventory-levels', 'figure')
+    brand_gaps_output = Output('brand-gaps', 'figure')
 
     # Define the inputs required by the callback function
-    inputs = [dash.dependencies.Input('xaxis-column', 'value'),
-              dash.dependencies.Input('xaxis-type', 'value'), ]
+    inputs = [Input('xaxis-column', 'value'),
+              Input('xaxis-type', 'value'), ]
 
     @app.callback(size_dist_output, inputs)
     def make_size_distribution(xaxis_column_name, xaxis_type):
@@ -109,14 +110,14 @@ def main():
 
 
     @app.callback(
-        dash.dependencies.Output('Boys-Girl-dropdown', 'options'),
-        [dash.dependencies.Input('Adult-Children-dropdown', 'value')])
+        Output('Boys-Girl-dropdown', 'options'),
+        [Input('Adult-Children-dropdown', 'value')])
     def set_collection(selected_collection):
         return [{'label': i, 'value': i} for i in all_options[selected_collection]]
 
     @app.callback(
-        dash.dependencies.Output('Legs-Torso-values', 'options'),
-        [dash.dependencies.Input('Boys-Girl-dropdown', 'value')])
+        Output('Legs-Torso-values', 'options'),
+        [Input('Boys-Girl-dropdown', 'value')])
     def set_boy_girl(selected_boy_girl):
         selected_collection = [i for i in all_options.keys() for f in all_options[i] if f == selected_boy_girl]
         return [{'label': i, 'value': i} for i in all_options[selected_collection[0]][selected_boy_girl]]
@@ -124,16 +125,16 @@ def main():
         # return [[{'label': k, 'value': k} for i in all_options.keys() for k in all_options[available_option].keys()]]
 
     @app.callback(
-        dash.dependencies.Output('Legs-Torso-values', 'value'),
-        [dash.dependencies.Input('Legs-Torso-values', 'options')])
+        Output('Legs-Torso-values', 'value'),
+        [Input('Legs-Torso-values', 'options')])
     def set_cities_value(available_option):
         return [available_option[0]['value']][0]
 
     @app.callback(
-        dash.dependencies.Output('display-selected-values', 'children'),
-        [dash.dependencies.Input('Adult-Children-dropdown', 'value'),
-         dash.dependencies.Input('Boys-Girl-dropdown', 'value'),
-         dash.dependencies.Input('Legs-Torso-values', 'value')])
+        Output('display-selected-values', 'children'),
+        [Input('Adult-Children-dropdown', 'value'),
+         Input('Boys-Girl-dropdown', 'value'),
+         Input('Legs-Torso-values', 'value')])
     def set_display_children(selected_collection=None, selected_boy_girl=None, selected_leg_torso=None):
         if selected_collection == 'OverAll':
             return 'You are displaying Over All'

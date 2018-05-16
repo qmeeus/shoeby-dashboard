@@ -60,21 +60,20 @@ def size_distribution(inventory, categories, brands, month_slider):
     traces = [
             go.Bar(
                 x=x_sales,
-                y=y_sales,
-                text=list(map(":.0%".format, y_sales)),
+                y=y_sales*100,
+                text=list(map("{:02.2f}".format, y_sales*100)),
                 textposition='auto',
                 name='Sales'
 
             ), go.Bar(
                 x=x_inventory,
-                y=y_inventory,
-                text=list(map(":.0%".format, y_inventory)),
+                y=y_inventory*100,
+                text=list(map("{:02.2f}".format, y_inventory*100)),
                 textposition='auto',
                 name='Stock levels',
                 marker=dict(color='rgb(255, 125, 0)')
             )
         ]
-
     layout = default_graph_layout()
     layout["title"] = "Relative Size Distribution of Sales vs Stocks"
     # layout["margin"] = {'l': 40, 'b': 40, 't': 10, 'r': 0},

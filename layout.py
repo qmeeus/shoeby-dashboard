@@ -86,7 +86,7 @@ def make_layout():
                              options=sampling_options,
                              value="M"
                          )],
-                        className='four columns'
+                        className='three columns'
                     ),
                     html.Div(
                         [html.P('Filter by month:'),
@@ -96,7 +96,14 @@ def make_layout():
                             max=12,
                             value=[1, 12]
                         )],
-                        className='five columns')
+                        className='four columns'),
+                    dcc.Checklist(
+                        id='relative_selector',
+                        options=[
+                            {'label': 'Relative sales', 'value': 'True'}
+                        ],
+                        values=[],
+                    )
                 ],
                 style={'margin-top': '20'},
                 className='row'

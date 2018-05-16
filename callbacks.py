@@ -81,11 +81,14 @@ def size_distribution(inventory, categories, brands, month_slider):
     return dict(data=traces, layout=layout)
 
 
-def sales_history(sales, categories, brands, month_slider, frequency):
+def sales_history(sales, categories, brands, month_slider, frequency, relative):
 
     sales = filter_data(sales, filter_many={"Brand": brands}, month_slider=month_slider)
     sales = sales.groupby([pd.Grouper(freq=frequency), 'Size']).sum().reset_index()
     sales = sales.pivot(index="order_date", columns="Size", values="Quantity")  # , 'Quantity Returned'
+
+    if 'True' in relative:
+        sales = sales.apply(lambda s: s / s.sum(), axis=1)
 
     traces = [go.Bar(x=sales.index, y=sales[category], name=category) for category in sales.columns]
 

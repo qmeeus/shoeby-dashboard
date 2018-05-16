@@ -26,7 +26,7 @@ def display_brand(selector):
 
 def update_brand_text(data, brands, categories, month_slider):
     dff = filter_data(data, filter_many={"Brand": brands}, month_slider=month_slider)
-    return "No of products: {}".format(dff.shape[0])
+    return "No of Wells: {}".format(dff.shape[0])
 
 
 def size_distribution(inventory, categories, brands, month_slider):
@@ -81,14 +81,11 @@ def size_distribution(inventory, categories, brands, month_slider):
     return dict(data=traces, layout=layout)
 
 
-def sales_history(sales, categories, brands, month_slider, frequency, relative):
+def sales_history(sales, categories, brands, month_slider, frequency):
 
     sales = filter_data(sales, filter_many={"Brand": brands}, month_slider=month_slider)
     sales = sales.groupby([pd.Grouper(freq=frequency), 'Size']).sum().reset_index()
     sales = sales.pivot(index="order_date", columns="Size", values="Quantity")  # , 'Quantity Returned'
-
-    if 'True' in relative:
-        sales = sales.apply(lambda s: s / s.sum(), axis=1)
 
     traces = [go.Bar(x=sales.index, y=sales[category], name=category) for category in sales.columns]
 

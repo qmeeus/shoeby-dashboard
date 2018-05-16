@@ -61,6 +61,14 @@ def main():
     def update_brand_text(brands, categories, month_slider):
         return callbacks.update_brand_text(inventory, brands, categories, month_slider)
 
+        # Selectors -> production text
+    @app.callback(Output('production_text', 'children'),
+                  [Input('brands', 'value'),
+                   Input('categories', 'value'),
+                   Input('month_slider', 'value')])
+    def update_production_text(brands, categories, month_slider):
+        return callbacks.update_production_text(inventory, brands, categories, month_slider)
+
     # Selectors -> matenboog
     @app.callback(Output('matenboog', 'figure'),
                   [Input('categories', 'value'),

@@ -96,13 +96,14 @@ def make_layout():
                             max=12,
                             value=[1, 12]
                         )],
-                        className='four columns'),
-                    dcc.Checklist(
-                        id='relative_selector',
-                        options=[
-                            {'label': 'Relative sales', 'value': 'True'}
-                        ],
-                        values=[],
+                    className='four columns'),
+                    html.Div(
+                        [dcc.Checklist(
+                            id='relative_selector',
+                            options=[{'label': 'Relative sales', 'value': 'True'}],
+                            values=["True"])],
+                        style = {'text-align': 'right'},
+                        className='three columns'
                     )
                 ],
                 style={'margin-top': '20'},

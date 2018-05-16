@@ -76,7 +76,7 @@ def size_distribution(inventory, categories, brands, month_slider):
         ]
 
     layout = default_graph_layout()
-    layout["title"] = "Size Distribution"
+    layout["title"] = "Relative Size Distribution of Sales vs Stocks"
     # layout["margin"] = {'l': 40, 'b': 40, 't': 10, 'r': 0},
 
     return dict(data=traces, layout=layout)
@@ -92,7 +92,7 @@ def sales_history(sales, categories, brands, month_slider, frequency):
 
     layout = default_graph_layout()
     layout["barmode"] = 'stack'
-    layout["title"] = "Sales history"
+    layout["title"] = "Sales History Including Size Distribution"
 
     return dict(
         data=traces,
@@ -138,6 +138,6 @@ def size_gap(inventory, categories, brands, month_slider):
     )]
 
     layout = default_graph_layout()
-    layout['title'] = "Size Gap"
+    layout['title'] = "Size Gap per Brand"
 
     return dict(data=traces, layout=layout)

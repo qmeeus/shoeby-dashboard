@@ -2,7 +2,8 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from tools import filter_data
-from controls2 import CATEGORIES, BRANDS
+from controls import CATEGORIES, BRANDS
+from layout import default_graph_layout
 
 
 def display_category(selector):
@@ -56,58 +57,42 @@ def size_distribution(inventory, categories, brands, month_slider):
     x_sales, y_sales = matenboog.index, matenboog["Sales"]
     x_inventory, y_inventory = matenboog.index, matenboog["Inventory"]
 
-    barplot = dict(
-
-        data=[
+    traces = [
             go.Bar(
                 x=x_sales,
                 y=y_sales,
-                text=y_sales,
+                text=list(map(":.0%".format, y_sales)),
                 textposition='auto',
                 name='Sales'
 
             ), go.Bar(
                 x=x_inventory,
                 y=y_inventory,
-                text=y_inventory,
+                text=list(map(":.0%".format, y_inventory)),
                 textposition='auto',
                 name='Stock levels',
                 marker=dict(color='rgb(255, 125, 0)')
             )
-        ],
-        layout=go.Layout(
-            xaxis={
-                'title': categories,
-            },
-            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest',
-        ),
+        ]
 
-    )
-    return barplot
+    layout = default_graph_layout()
+    layout["title"] = "Size Distribution"
+    # layout["margin"] = {'l': 40, 'b': 40, 't': 10, 'r': 0},
+
+    return dict(data=traces, layout=layout)
 
 def sales_history(sales, categories, brands, month_slider, frequency):
 
     sales = filter_data(sales, filter_many={"Brand": brands}, month_slider=month_slider)
-    sales = sales.resample(frequency).sum()
-    print(sales.shape)
-    print(sales.columns)
+    sales = sales.groupby([pd.Grouper(freq=frequency), 'Size']).sum().reset_index()
+    sales = sales.pivot(index="order_date", columns="Size", values="Quantity")  # , 'Quantity Returned'
 
-    # frequency = kwargs.get("frequency", SAMPLING)
-    # y_data = kwargs.get("y_data")
-    # if y_data:
-    #     columns = FILTERS[list(map(lambda x: x[1], FILTERS)).index(y_data)][0]
-    #     sales = sales.reset_index().pivot_table(index="order_date", columns=columns, values="Quantity", aggfunc="sum")
-    # else:
-    #     data = data["Quantity"]
-    # data = data.resample(frequency).sum()
-    # x_data, y_data = data.index, data.values
-    #
-    # data = [go.Bar(x=x_data, y=y_data)]
-    # layout = go.Layout(
-    #         xaxis={
-    #             'title': "Sales history",
-    #         },
-    #         margin={'l': 40, 'b': 40, 't': 10, 'r': 0}
-    #     )
-    # return dict(data=data, layout=layout)
+    traces = [go.Bar(x=sales.index, y=sales[category], name=category) for category in sales.columns]
+
+    layout = default_graph_layout()
+    layout["barmode"] = 'stack'
+    layout["title"] = "Sales history"
+
+    return dict(
+        data=traces,
+        layout=layout)

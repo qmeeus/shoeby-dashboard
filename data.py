@@ -137,13 +137,14 @@ def load_sales():
         sales = build_sales()
         sales.to_csv(path)
         return sales
-    return (
+    sales = (
         pd.read_csv(path)
         .assign(order_date=lambda df: pd.to_datetime(df["order_date"]))
         .set_index("order_date")
         .pipe(filter_sizes)
 
     )
+    return sales
 
 
 def load_inventory():

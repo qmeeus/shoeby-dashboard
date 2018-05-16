@@ -37,10 +37,10 @@ def main():
     # Create callbacks
 
     # Radio -> multi
-    @app.callback(Output('categories', 'value'),
-                  [Input('category_selector', 'value')])
-    def display_category(selector):
-        return callbacks.display_category(selector)
+    # @app.callback(Output('categories', 'value'),
+    #               [Input('category_selector', 'value')])
+    # def display_category(selector):
+    #     return callbacks.display_category(selector)
 
     # Radio -> multi
     @app.callback(Output('brands', 'value'),

@@ -64,15 +64,17 @@ def size_distribution(inventory, sizes, brands, month_slider):
             go.Bar(
                 x=x_sales,
                 y=y_sales,
-                # text=list(map("{:.0%}".format, y_sales*100)),
-                # textposition='auto',
+                text=list(map("{:.0%}".format, y_sales)),
+                textfont={"color": "#fff"},
+                textposition='auto',
                 name='Sales'
 
             ), go.Bar(
                 x=x_inventory,
                 y=y_inventory,
-                # text=list(map("{:.0%}".format, y_inventory)),
-                # textposition='auto',
+                text=list(map("{:.0%}".format, y_inventory)),
+                textfont={"color": "#fff"},
+                textposition='auto',
                 name='Stock levels',
                 marker=dict(color='rgb(255, 125, 0)')
             )
@@ -149,7 +151,7 @@ def size_gap(inventory, sizes, brands, month_slider):
         matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
     except KeyError:
         return dict(data=[], layout={})
-    
+
     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
 
     x_data, y_data = gap_summary.index, gap_summary["gap"]
@@ -157,8 +159,9 @@ def size_gap(inventory, sizes, brands, month_slider):
     traces = [go.Bar(
         x=x_data,
         y=y_data,
-        # text=list(map("{:02.2f}%".format, y_data * 100)),
-        # textposition='auto',
+        text=list(map("{:.2f}".format, y_data)),
+        textfont={"color": "#fff"},
+        textposition='auto',
         marker=dict(color='rgb(255, 125, 0)')
     )]
 

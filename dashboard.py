@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 from data import load_sales, load_inventory
 from layout import make_layout
 import callbacks
-
+import calendar
 
 # TODO: How to include pyplot & seaborn plots in dash?
 # TODO: Dynamic filters
@@ -47,7 +47,12 @@ def main():
                   [Input('brand_selector', 'value')])
     def display_brand(selector):
         return callbacks.display_brand(selector)
-
+    
+    @app.callback(Output('year_text', 'children'),
+                  [Input('month_slider', 'value')])
+    def update_year_text(month_slider):
+        return "{} | {}".format(calendar.month_abbr[month_slider[0]], calendar.month_abbr[month_slider[1]])
+    
     # Selectors -> gap text
     @app.callback(Output('gap_text', 'children'),
                   [Input('brands', 'value'),

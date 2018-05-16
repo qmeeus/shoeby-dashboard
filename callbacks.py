@@ -81,6 +81,7 @@ def size_distribution(inventory, categories, brands, month_slider):
 
     return dict(data=traces, layout=layout)
 
+
 def sales_history(sales, categories, brands, month_slider, frequency):
 
     sales = filter_data(sales, filter_many={"Brand": brands}, month_slider=month_slider)
@@ -96,3 +97,47 @@ def sales_history(sales, categories, brands, month_slider, frequency):
     return dict(
         data=traces,
         layout=layout)
+
+
+def size_gap(inventory, categories, brands, month_slider):
+    inventory = filter_data(inventory, filter_many={"Brand": brands}, month_slider=month_slider)
+
+    stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+    sales = inventory[inventory["Sales"] != 0]
+    matenboog_stock = (stocks
+                       .reset_index()
+                       [["Brand", "Size", "NetQuantity"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       .rename(columns={"NetQuantity": "Inventory"})
+                       )
+
+    matenboog_sales = (sales
+                       .reset_index()
+                       [["Brand", "Size", "Sales"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       )
+    matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+
+    matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
+    gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
+
+    x_data, y_data = gap_summary.index, gap_summary["gap"]
+
+    traces = [go.Bar(
+        x=x_data,
+        y=y_data,
+        text=y_data,
+        textposition='auto',
+        marker=dict(color='rgb(255, 125, 0)')
+    )]
+
+    layout = default_graph_layout()
+    layout['title'] = "Size Gap"
+
+    return dict(data=traces, layout=layout)

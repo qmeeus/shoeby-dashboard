@@ -173,7 +173,7 @@ def make_layout():
                 [
                     html.Div(
                         [
-                            dcc.Graph(id='count_graph')
+                            dcc.Graph(id='size_gap')
                         ],
                         className='four columns',
                         style={'margin-top': '10'}

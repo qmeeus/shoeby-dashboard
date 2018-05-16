@@ -316,66 +316,66 @@ def prepare_inventory(data, **kwargs):
     return x_data, y_data
 
 
-def prepare_gap_plot(inventory, **kwargs):
-    inventory = filter_data(inventory, **kwargs)
-
-    stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
-    sales = inventory[inventory["Sales"] != 0]
-    matenboog_stock = (stocks
-                       .reset_index()
-                       [["Brand", "Size", "NetQuantity"]]
-                       .groupby(["Brand", "Size"])
-                       .sum()
-                       .groupby("Brand")
-                       .apply(lambda x: x / float(x.sum()))
-                       .rename(columns={"NetQuantity": "Inventory"})
-                       )
-
-    matenboog_sales = (sales
-                       .reset_index()
-                       [["Brand", "Size", "Sales"]]
-                       .groupby(["Brand", "Size"])
-                       .sum()
-                       .groupby("Brand")
-                       .apply(lambda x: x / float(x.sum()))
-                       )
-    matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
-    if len(matenboog) == 0:
-        return None, None
-    matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
-    gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
-
-    x_data, y_data = gap_summary.index, gap_summary["gap"]
-    return x_data, y_data
-
-
-def gap_plot(brand, relative, inventory):
-    x_data, y_data = prepare_gap_plot(
-        inventory,
-        Brand=brand
-    )
-
-    barplot = dict(
-
-        data=[
-            go.Bar(
-                x=x_data,
-                y=y_data,
-                text=y_data,
-                textposition='auto',
-                marker=dict(color='rgb(255, 125, 0)')
-            )
-        ],
-        layout=go.Layout(
-            xaxis={
-                'title': brand,
-            },
-            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest',
-        ),
-
-    )
-    return barplot
+# def prepare_gap_plot(inventory, **kwargs):
+#     inventory = filter_data(inventory, **kwargs)
+#
+#     stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+#     sales = inventory[inventory["Sales"] != 0]
+#     matenboog_stock = (stocks
+#                        .reset_index()
+#                        [["Brand", "Size", "NetQuantity"]]
+#                        .groupby(["Brand", "Size"])
+#                        .sum()
+#                        .groupby("Brand")
+#                        .apply(lambda x: x / float(x.sum()))
+#                        .rename(columns={"NetQuantity": "Inventory"})
+#                        )
+#
+#     matenboog_sales = (sales
+#                        .reset_index()
+#                        [["Brand", "Size", "Sales"]]
+#                        .groupby(["Brand", "Size"])
+#                        .sum()
+#                        .groupby("Brand")
+#                        .apply(lambda x: x / float(x.sum()))
+#                        )
+#     matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+#     if len(matenboog) == 0:
+#         return None, None
+#     matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
+#     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
+#
+#     x_data, y_data = gap_summary.index, gap_summary["gap"]
+#     return x_data, y_data
+#
+#
+# def gap_plot(brand, relative, inventory):
+#     x_data, y_data = prepare_gap_plot(
+#         inventory,
+#         Brand=brand
+#     )
+#
+#     barplot = dict(
+#
+#         data=[
+#             go.Bar(
+#                 x=x_data,
+#                 y=y_data,
+#                 text=y_data,
+#                 textposition='auto',
+#                 marker=dict(color='rgb(255, 125, 0)')
+#             )
+#         ],
+#         layout=go.Layout(
+#             xaxis={
+#                 'title': brand,
+#             },
+#             margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+#             hovermode='closest',
+#         ),
+#
+#     )
+#     return barplot
 
 
 # Added by Wesley

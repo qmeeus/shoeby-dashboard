@@ -73,6 +73,13 @@ def main():
     def sales_history(categories, brands, month_slider, frequency):
         return callbacks.sales_history(sales, categories, brands, month_slider, frequency)
 
+    # Selectors -> size gap
+    @app.callback(Output('size_gap', 'figure'),
+                  [Input('categories', 'value'),
+                   Input('brands', 'value'),
+                   Input('month_slider', 'value')])
+    def size_gap(categories, brands, month_slider):
+        return callbacks.size_gap(inventory, categories, brands, month_slider)
 
 
     # Set the layout (HTML/CSS)

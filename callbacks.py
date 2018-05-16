@@ -100,6 +100,25 @@ def sales_history(sales, sizes, brands, month_slider, frequency, relative):
 
     return dict(data=traces, layout=layout)
 
+def inventory_history(inventory, categories, brands, month_slider, frequency, relative):
+
+    inventory = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+    inventory = filter_data(inventory, filter_many={"Brand": brands}, month_slider=month_slider)
+    inventory = inventory.groupby([pd.Grouper(freq=frequency), 'Size']).sum().reset_index()
+    inventory = inventory.pivot(index="posting_date", columns="Size", values="Quantity")  # , 'Quantity Returned'
+
+    if 'True' in relative:
+        inventory = inventory.apply(lambda s: s / s.sum(), axis=1)
+
+    traces = [go.Bar(x=inventory.index, y=inventory[category], name=category) for category in inventory.columns]
+
+    layout = default_graph_layout()
+    layout["barmode"] = 'stack'
+    layout["title"] = "Inventory History Including Size Distribution"
+
+    return dict(
+        data=traces,
+        layout=layout)
 
 def size_gap(inventory, sizes, brands, month_slider):
     inventory = filter_data(inventory, filter_many={"Brand": brands}, month_slider=month_slider)

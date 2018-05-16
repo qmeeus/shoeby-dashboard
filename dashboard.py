@@ -5,6 +5,7 @@ from data import load_sales, load_inventory
 from layout import make_layout
 import callbacks
 
+
 # TODO: How to include pyplot & seaborn plots in dash?
 # TODO: Dynamic filters
 # TODO: Check how to manage multiple graphs
@@ -46,7 +47,7 @@ def main():
                   [Input('brand_selector', 'value')])
     def display_brand(selector):
         return callbacks.display_brand(selector)
-    
+
     @app.callback(Output('year_text', 'children'),
                   [Input('month_slider', 'value')])
     def update_year_text(month_slider):
@@ -61,6 +62,7 @@ def main():
         return callbacks.update_brand_text(inventory, categories, brands, month_slider)
 
     # Selectors -> production text
+
     @app.callback(Output('production_text', 'children'),
                   [Input('categories', 'value'),
                    Input('brands', 'value'),
@@ -85,6 +87,16 @@ def main():
                    Input('relative_selector', 'values')])
     def sales_history(categories, brands, month_slider, frequency, relative):
         return callbacks.sales_history(sales, categories, brands, month_slider, frequency, relative)
+
+    #Inventory_history
+    @app.callback(Output('inventory_history', 'figure'),
+                  [Input('categories', 'value'),
+                   Input('brands', 'value'),
+                   Input('month_slider', 'value'),
+                   Input('sample_frequency', 'value'),
+                   Input('relative_selector', 'values')])
+    def inventory_history(categories, brands, month_slider, frequency, relative):
+        return callbacks.inventory_history(inventory, categories, brands, month_slider, frequency, relative)
 
     # Selectors -> size gap
     @app.callback(Output('size_gap', 'figure'),

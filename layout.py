@@ -195,7 +195,7 @@ def make_layout():
                     ),
                     html.Div(
                         [
-                            dcc.Graph(id='aggregated_graph')
+                            dcc.Graph(id='inventory_history')
                         ],
                         className='four columns',
                         style={'margin-top': '10'}

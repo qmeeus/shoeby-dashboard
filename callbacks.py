@@ -26,7 +26,7 @@ def display_brand(selector):
 
 def update_brand_text(data, brands, categories, month_slider):
     dff = filter_data(data, filter_many={"Brand": brands}, month_slider=month_slider)
-    return "No of Wells: {}".format(dff.shape[0])
+    return "No of products: {}".format(dff.shape[0])
 
 
 def size_distribution(inventory, categories, brands, month_slider):

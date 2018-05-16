@@ -43,7 +43,6 @@ def update_gap_text(inventory, sizes, brands, month_slider):
         .agg([sum_squared, sum_absolute, sum_negative])
         .sum()
     )
-    print(gap_summary)
     return (f"Sum of Squared Differences {gap_summary['sum_squared']:.2f} "
             f"| Sum of Absolute Differences {gap_summary['sum_absolute']:.2f}")
 

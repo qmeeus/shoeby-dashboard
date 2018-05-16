@@ -145,7 +145,11 @@ def size_gap(inventory, sizes, brands, month_slider):
                        )
     matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
 
-    matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
+    try:
+        matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
+    except KeyError:
+        return dict(data=[], layout={})
+    
     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
 
     x_data, y_data = gap_summary.index, gap_summary["gap"]

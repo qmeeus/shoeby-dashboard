@@ -3,6 +3,7 @@ import warnings
 import pandas as pd
 import datetime as dt
 from pandas.api.types import CategoricalDtype
+import plotly.graph_objs as go
 
 from config import *
 
@@ -46,11 +47,11 @@ def build_sales():
         .dropna(how='all', axis=1)
         .pipe(lambda df: df.where(~df.Description.isin(exclude)).dropna())
         .set_index("order_date")
-        .groupby([pd.Grouper(freq=SAMPLING), "Horizontal Component Code"] + list(map(lambda x: x[0], FILTERS)))
+        .rename(columns={"Horizontal Component Code": "Size"})
+        .groupby([pd.Grouper(freq=SAMPLING), "Size"] + list(map(lambda x: x[0], FILTERS)))
         .aggregate({"Quantity": 'sum', "Quantity Returned": 'sum'})
         .reset_index()
         .set_index("order_date")
-        .rename(columns={"Horizontal Component Code": "Size"})
         .pipe(filter_sizes)
 
     )
@@ -109,7 +110,7 @@ def build_inventory():
         .groupby(["posting_date", "Brand", "Item No_", "Size", "Color"])
         .agg({
             column: 'max' for column in final_column_selection})
-.reset_index()
+        .reset_index()
         .set_index("posting_date")
         .pipe(filter_sizes)
 
@@ -136,24 +137,28 @@ def load_sales():
         sales = build_sales()
         sales.to_csv(path)
         return sales
-    return (
+    sales = (
         pd.read_csv(path)
         .assign(order_date=lambda df: pd.to_datetime(df["order_date"]))
         .set_index("order_date")
+        .pipe(filter_sizes)
+
     )
+    return sales
 
 
 def load_inventory():
     filename = INVENTORY
     path = join_path(filename)
     if not os.path.exists(path):
-        sales = build_inventory()
-        sales.to_csv(path)
-        return sales
+        inventory = build_inventory()
+        inventory.to_csv(path)
+        return inventory
     return (
         pd.read_csv(path)
         .assign(posting_date=lambda df: pd.to_datetime(df["posting_date"]))
         .set_index("posting_date")
+        .pipe(filter_sizes)
     )
 
 # ----------------------------------------------------------------------------------------
@@ -163,10 +168,11 @@ def load_inventory():
 
 def filter_sizes(data):
     # Select relevant sizes
+    data = data.copy()
     sizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
     column_name = "Size"
     categorical_size_type = CategoricalDtype(categories=sizes, ordered=True)
-    data = data[data[column_name].isin(sizes)].copy()
+    data = data[data[column_name].isin(sizes)]
     data[column_name] = data[column_name].astype(categorical_size_type)
     return data
 
@@ -213,23 +219,78 @@ def prepare_data(data, **kwargs):
 def filter_data(data, **kwargs):
     data = data.copy()
     for key, value in kwargs.items():
-        if key in data.columns:
+        if key in data.columns and value is not None:
             data = data.loc[data[key] == value]
 
     return data
 
 
-def prepare_size_dist(sales, inventory, **kwargs):
-    output = []
-    for i, df in enumerate([sales, inventory]):
-        y_column = "Quantity" if not i else "NetQuantity"
-        df = prepare_data(df, **kwargs)
-        df = df[["Size", y_column]]
-        grouped = df.groupby("Size").sum()
-        output.append(grouped.index)
-        output.append(grouped[y_column])
+def prepare_size_dist(inventory, **kwargs):
+    inventory = filter_data(inventory, **kwargs)
 
-    return output
+    stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+    sales = inventory[inventory["Sales"] != 0]
+    matenboog_stock = (stocks
+                       .reset_index()
+                       [["Brand", "Size", "NetQuantity"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       .rename(columns={"NetQuantity": "Inventory"})
+                       )
+
+    matenboog_sales = (sales
+                       .reset_index()
+                       [["Brand", "Size", "Sales"]]
+                       .groupby(["Brand", "Size"])
+                       .sum()
+                       .groupby("Brand")
+                       .apply(lambda x: x / float(x.sum()))
+                       )
+    matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+    if len(matenboog) == 0:
+        return None, None
+    gap_summary = matenboog.groupby(level=1).agg(lambda s: abs(s).sum())
+    x_sales, y_sales = gap_summary.index, gap_summary["Sales"]
+    x_inventory, y_inventory = gap_summary.index, gap_summary["Inventory"]
+    return x_sales, y_sales, x_inventory, y_inventory
+
+
+def size_dist_plot(brand, relative, inventory):
+    x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(
+        inventory,
+        Brand=brand
+    )
+    barplot = dict(
+
+        data=[
+            go.Bar(
+                x=x_sales,
+                y=y_sales,
+                text=y_sales,
+                textposition='auto',
+                name='Sales'
+
+            ), go.Bar(
+                x=x_inventory,
+                y=y_inventory,
+                text=y_inventory,
+                textposition='auto',
+                name='Stock levels',
+                marker=dict(color='rgb(255, 125, 0)')
+            )
+        ],
+        layout=go.Layout(
+            xaxis={
+                'title': brand,
+            },
+            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+            hovermode='closest',
+        ),
+
+    )
+    return barplot
 
 
 def prepare_sales_history(sales, **kwargs):
@@ -244,9 +305,9 @@ def prepare_sales_history(sales, **kwargs):
     data = data.resample(frequency).sum()
     return data.index, data.values
 
+
 def prepare_inventory(data, **kwargs):
     data = filter_data(data, **kwargs)
-
     data = data[["Size", "NetQuantity"]]
     grouped = data.groupby("Size").sum()
     x_data = grouped.index
@@ -254,27 +315,86 @@ def prepare_inventory(data, **kwargs):
 
     return x_data, y_data
 
-def prepare_gaps(data, **kwargs):
-    data = filter_data(data, **kwargs)
-    data = data[["Size", "Brand", "Quantity"]]
-    grouped = data.groupby("Brand", "Size").sum()
-    return grouped
+
+# def prepare_gap_plot(inventory, **kwargs):
+#     inventory = filter_data(inventory, **kwargs)
+#
+#     stocks = inventory[(inventory["Sales"] == 0) & (inventory["NetQuantity"] > 0)]
+#     sales = inventory[inventory["Sales"] != 0]
+#     matenboog_stock = (stocks
+#                        .reset_index()
+#                        [["Brand", "Size", "NetQuantity"]]
+#                        .groupby(["Brand", "Size"])
+#                        .sum()
+#                        .groupby("Brand")
+#                        .apply(lambda x: x / float(x.sum()))
+#                        .rename(columns={"NetQuantity": "Inventory"})
+#                        )
+#
+#     matenboog_sales = (sales
+#                        .reset_index()
+#                        [["Brand", "Size", "Sales"]]
+#                        .groupby(["Brand", "Size"])
+#                        .sum()
+#                        .groupby("Brand")
+#                        .apply(lambda x: x / float(x.sum()))
+#                        )
+#     matenboog = pd.concat([matenboog_stock, matenboog_sales], axis=1, join="outer").fillna(0)
+#     if len(matenboog) == 0:
+#         return None, None
+#     matenboog["gap"] = matenboog["Inventory"] - matenboog["Sales"]
+#     gap_summary = matenboog.groupby(level=0).agg(lambda s: abs(s).sum())
+#
+#     x_data, y_data = gap_summary.index, gap_summary["gap"]
+#     return x_data, y_data
+#
+#
+# def gap_plot(brand, relative, inventory):
+#     x_data, y_data = prepare_gap_plot(
+#         inventory,
+#         Brand=brand
+#     )
+#
+#     barplot = dict(
+#
+#         data=[
+#             go.Bar(
+#                 x=x_data,
+#                 y=y_data,
+#                 text=y_data,
+#                 textposition='auto',
+#                 marker=dict(color='rgb(255, 125, 0)')
+#             )
+#         ],
+#         layout=go.Layout(
+#             xaxis={
+#                 'title': brand,
+#             },
+#             margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+#             hovermode='closest',
+#         ),
+#
+#     )
+#     return barplot
 
 
-def concat_brand_gaps(sales, inventory):
-    data = pd.concat([inventory, sales], join='outer', axis=1).fillna(0)
-    data = data[data['In'] > 0]
-    data2 = data.groupby(level=0).apply(lambda x: x['In'] / float(x['In'].sum()))
-    data3 = data.groupby(level=0).apply(lambda x: x['Out'] / float(x['Out'].sum()))
-    data2, data3 = pd.DataFrame(data2), pd.DataFrame(data3)
-    data = pd.concat([data2, data3], join='outer', axis=1).fillna(0)
-    data['gap'] = abs(data['In'] - data['Out'])
-    # data = data.groupby('Brand').sum().sort_values('gap', ascending=False)
-    data = data.groupby('Brand').agg({'gap': 'sum'}).sort_values('gap', ascending=False)
+# Added by Wesley
+def load_brand(brand):
+    with open('./BrandBin/' + brand + '.txt') as f:
+        return [col.split(', ') for col in f.readlines()][0]
 
-    x_data = data.index
-    y_data = data['gap']
-    return x_data, y_data
+
+def replace_brand(brand):
+    brand_name = brand.upper()
+    return {e: brand_name for e in load_brand(brand)}
+
+
+def group_brands(df):
+    brands = ['cu','jill','blend','veromoda','clt', 'sense', 'eksept', 'refill']
+    for i in range(len(brands)):
+        df.Brand = df.Brand.replace(replace_brand(brands[i]))
+    return df
+
 # ----------------------------------------------------------------------------------------
 #                                       UTILS
 # ----------------------------------------------------------------------------------------
@@ -295,6 +415,5 @@ def join_path(filename):
 # DEBUG
 if __name__ == '__main__':
     inventory = load_inventory()
-    # sales = load_sales()
-    # x_sales, y_sales, x_inventory, y_inventory = prepare_size_dist(sales, inventory)
-    # print(inventory.columns)
+
+

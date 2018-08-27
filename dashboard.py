@@ -1,3 +1,5 @@
+#!/home/quent/.local/bin/anaconda3/bin/python
+
 import dash
 from dash.dependencies import Input, Output
 

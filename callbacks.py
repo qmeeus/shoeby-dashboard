@@ -7,14 +7,6 @@ from controls import SIZES, BRANDS
 from layout import default_graph_layout
 
 
-# def display_category(selector):
-#     if selector == 'all':
-#         return SIZES
-#     elif selector == 'Adult':
-#         return []
-#     else:
-#         return []
-
 
 def display_brand(selector):
     if selector == 'all':
